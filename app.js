@@ -14,7 +14,7 @@ function logout(){
 async function api(path, method="GET", body=null){
   const headers = {"Content-Type":"application/json"};
   const key = getToken();
-  if(key) headers["X-API-Key"] = key;
+  if(key) headers["1f16235c23215f6745c83ebe2b33ea0b46c776cd363c569d"] = key;
 
   const res = await fetch(`${BACKEND}${path}`,{
     method,
@@ -29,5 +29,6 @@ async function api(path, method="GET", body=null){
   if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
   return data;
 }
+
 
 
