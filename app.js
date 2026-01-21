@@ -1,7 +1,7 @@
 const BACKEND = "https://api.676trades.org";
 
 function setToken(token){
-  localStorage.setItem("apiKey", token);
+  localStorage.setItem("1f16235c23215f6745c83ebe2b33ea0b46c776cd363c569d", token);
 }
 function getToken(){
   return localStorage.getItem("apiKey") || "";
@@ -29,3 +29,4 @@ async function api(path, method="GET", body=null){
   if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
   return data;
 }
+
