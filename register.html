@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Register</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div>
+        <a href="/login.html">Login</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Create account</h1>
+      <div class="small">You’ll get your control API key after registration.</div>
+
+      <label>Email</label>
+      <input id="email" type="email" placeholder="you@example.com"/>
+
+      <label>Password</label>
+      <input id="password" type="password" placeholder="Create a password"/>
+
+      <div style="margin-top:14px;display:flex;gap:10px;">
+        <button id="btn">Register</button>
+        <button class="secondary" onclick="window.location.href='/login.html'">Go to login</button>
+      </div>
+
+      <div id="msg" class="toast"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById("btn").onclick = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("msg");
+      msg.textContent = "Registering...";
+
+      try{
+        const data = await api("/auth/register","POST",{email,password});
+        // your backend returns api_key on register
+        setToken(data.api_key);
+        msg.textContent = "Registered! Redirecting...";
+        setTimeout(()=>window.location.href="/dashboard.html",700);
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
+  </script>
+</body>
+</html>

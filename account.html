@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Account</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/billing.html">Billing</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Account</h1>
+      <div class="small">
+        Broker tokens depend on the broker. For MT5, most users will run the EA on their terminal and use your API key to control it.
+      </div>
+      <hr/>
+
+      <label>Your API Key (controls the EA)</label>
+      <input id="key" readonly/>
+
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <button class="secondary" id="copy">Copy</button>
+        <button class="secondary" onclick="window.location.href='/dashboard.html'">Back</button>
+      </div>
+
+      <div id="msg" class="toast"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById("key").value = getToken();
+    document.getElementById("copy").onclick = async ()=>{
+      await navigator.clipboard.writeText(getToken());
+      document.getElementById("msg").textContent = "Copied.";
+    }
+  </script>
+</body>
+</html>
