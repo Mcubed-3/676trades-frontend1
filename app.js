@@ -4,10 +4,10 @@ function setToken(token){
   localStorage.setItem("1f16235c23215f6745c83ebe2b33ea0b46c776cd363c569d", token);
 }
 function getToken(){
-  return localStorage.getItem("apiKey") || "";
+  return localStorage.getItem("1f16235c23215f6745c83ebe2b33ea0b46c776cd363c569d") || "";
 }
 function logout(){
-  localStorage.removeItem("apiKey");
+  localStorage.removeItem("1f16235c23215f6745c83ebe2b33ea0b46c776cd363c569d");
   window.location.href = "/login.html";
 }
 
@@ -29,4 +29,5 @@ async function api(path, method="GET", body=null){
   if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
   return data;
 }
+
 
