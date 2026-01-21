@@ -10,9 +10,7 @@
   <div class="container">
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div>
-        <a href="/login.html">Login</a>
-      </div>
+      <div><a href="/login.html">Login</a></div>
     </div>
 
     <div class="card">
@@ -44,7 +42,6 @@
 
       try{
         const data = await api("/auth/register","POST",{email,password});
-        // your backend returns api_key on register
         setToken(data.api_key);
         msg.textContent = "Registered! Redirecting...";
         setTimeout(()=>window.location.href="/dashboard.html",700);
