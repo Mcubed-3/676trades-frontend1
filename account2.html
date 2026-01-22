@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Account</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Account</h1>
+      <div class="small">Manage your profile + API key.</div>
+      <hr/>
+
+      <div class="kv">
+        <div><b>Email</b><span id="email">-</span></div>
+        <div><b>Display name</b><span id="nameText">-</span></div>
+        <div><b>Created</b><span id="created">-</span></div>
+        <div><b>Last login</b><span id="last">-</span></div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label>Display name (optional)</label>
+        <input id="display_name" placeholder="e.g. Monair"/>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button id="saveNameBtn">Save name</button>
+          <button id="copyKeyBtn" class="secondary">Copy API key</button>
+        </div>
+      </div>
+
+      <hr style="margin-top:18px;"/>
+
+      <h2 style="margin-top:0;">Rotate API Key</h2>
+      <div class="small">
+        If your key gets exposed, rotate it. You’ll need to paste the new key into your EA again.
+      </div>
+
+      <label style="margin-top:10px;">Confirm password</label>
+      <input id="pw" type="password" placeholder="Your password"/>
+
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="rotateBtn" class="danger">Rotate key</button>
+      </div>
+
+      <div id="msg" class="toast"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+
+    function requireLogin(){
+      if(!getToken()){
+        window.location.href="/login.html";
+        return false;
+      }
+      return true;
+    }
+
+    async function loadMe(){
+      msg.textContent = "Loading...";
+      try{
+        const me = await api("/account/me","GET");
+        document.getElementById("email").textContent = me.email || "-";
+        document.getElementById("nameText").textContent = me.display_name || "-";
+        document.getElementById("created").textContent = me.created_at ? new Date(me.created_at).toLocaleString() : "-";
+        document.getElementById("last").textContent = me.last_login_at ? new Date(me.last_login_at).toLocaleString() : "-";
+        document.getElementById("display_name").value = me.display_name || "";
+        msg.textContent = "";
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    }
+
+    document.getElementById("saveNameBtn").onclick = async ()=>{
+      msg.textContent = "Saving...";
+      try{
+        const display_name = document.getElementById("display_name").value.trim();
+        await api("/account/profile","POST",{ display_name });
+        msg.textContent = "Saved.";
+        await loadMe();
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
+
+    document.getElementById("copyKeyBtn").onclick = async ()=>{
+      const key = getToken();
+      await navigator.clipboard.writeText(key);
+      msg.textContent = "API key copied.";
+    };
+
+    document.getElementById("rotateBtn").onclick = async ()=>{
+      msg.textContent = "Rotating...";
+      try{
+        const password = document.getElementById("pw").value.trim();
+        const email = document.getElementById("email").textContent.trim();
+        const data = await api("/auth/rotate-key","POST",{ email, password });
+        setToken(data.api_key);
+        msg.textContent = "Rotated. New API key saved in browser + copied.";
+        await navigator.clipboard.writeText(data.api_key);
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
+
+    if(requireLogin()) loadMe();
+  </script>
+</body>
+</html>
