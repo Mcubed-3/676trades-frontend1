@@ -12,7 +12,9 @@
       <div><b>676Trades</b></div>
       <div style="display:flex;gap:12px;align-items:center;">
         <a href="/dashboard.html">Dashboard</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a href="/setup.html">Setup</a>
+        <a href="/billing.html">Billing</a>
+        <a href="#" onclick="logout(); return false;">Logout</a>
       </div>
     </div>
 
@@ -67,14 +69,20 @@
       return true;
     }
 
+    function fmtDate(v){
+      if(!v) return "-";
+      try { return new Date(v).toLocaleString(); }
+      catch(e){ return v; }
+    }
+
     async function loadMe(){
       msg.textContent = "Loading...";
       try{
         const me = await api("/account/me","GET");
         document.getElementById("email").textContent = me.email || "-";
         document.getElementById("nameText").textContent = me.display_name || "-";
-        document.getElementById("created").textContent = me.created_at ? new Date(me.created_at).toLocaleString() : "-";
-        document.getElementById("last").textContent = me.last_login_at ? new Date(me.last_login_at).toLocaleString() : "-";
+        document.getElementById("created").textContent = fmtDate(me.created_at);
+        document.getElementById("last").textContent = fmtDate(me.last_login_at);
         document.getElementById("display_name").value = me.display_name || "";
         msg.textContent = "";
       }catch(e){
@@ -88,6 +96,7 @@
         const display_name = document.getElementById("display_name").value.trim();
         await api("/account/profile","POST",{ display_name });
         msg.textContent = "Saved.";
+        setTimeout(()=>msg.textContent="",1200);
         await loadMe();
       }catch(e){
         msg.textContent = "Error: " + e.message;
@@ -98,6 +107,7 @@
       const key = getToken();
       await navigator.clipboard.writeText(key);
       msg.textContent = "API key copied.";
+      setTimeout(()=>msg.textContent="",1200);
     };
 
     document.getElementById("rotateBtn").onclick = async ()=>{
@@ -107,8 +117,8 @@
         const email = document.getElementById("email").textContent.trim();
         const data = await api("/auth/rotate-key","POST",{ email, password });
         setToken(data.api_key);
-        msg.textContent = "Rotated. New API key saved in browser + copied.";
         await navigator.clipboard.writeText(data.api_key);
+        msg.textContent = "Rotated. New API key saved + copied. Update your EA inputs.";
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
