@@ -11,17 +11,16 @@
     <div class="nav">
       <div><b>676Trades</b></div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <a href="/setup.html">Setup</a>
         <a href="/account2.html">Account</a>
         <a href="/billing.html">Billing</a>
-        <a href="#" onclick="logout(); return false;">Logout</a>
+        <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
 
-    <!-- STATUS CARD -->
+    <!-- STATUS -->
     <div class="card">
       <h1>Dashboard</h1>
-      <div class="small">Controls your MT5 EA. Changes are picked up on the next EA poll.</div>
+      <div class="small">Controls your MT5 EA. Changes apply on the next EA poll.</div>
       <hr/>
 
       <div class="kv">
@@ -39,22 +38,18 @@
       <div id="msg" class="toast"></div>
     </div>
 
-    <!-- SETTINGS CARD -->
+    <!-- SETTINGS -->
     <div class="card">
       <h2>Trading Settings</h2>
 
       <div class="row">
         <div>
           <label>Trading Pairs (comma-separated)</label>
-          <input id="pairs" placeholder="XAUUSD,EURUSD,GBPUSD,USDJPY" value="XAUUSD"/>
-          <div class="small" style="margin-top:6px;opacity:0.8;">
-            Example: XAUUSD,EURUSD,GBPUSD,USDJPY
-          </div>
+          <input id="pairs" placeholder="XAUUSD,EURUSD,GBPUSD" />
         </div>
-
         <div>
           <label>Lot Size</label>
-          <input id="lot" type="number" step="0.01" value="0.01"/>
+          <input id="lot" type="number" step="0.01"/>
         </div>
       </div>
 
@@ -62,63 +57,99 @@
         <div>
           <label>SL Mode</label>
           <select id="sl_mode">
-            <option value="dynamic">Dynamic (pattern-based)</option>
-            <option value="fixed">Fixed (pips)</option>
+            <option value="dynamic">Dynamic</option>
+            <option value="fixed">Fixed</option>
           </select>
         </div>
-
         <div>
           <label>TP Mode</label>
           <select id="tp_mode">
-            <option value="rr">Risk / Reward (RR)</option>
-            <option value="pattern_mult">Pattern multiplier</option>
-            <option value="fixed">Fixed (pips)</option>
+            <option value="rr">Risk / Reward</option>
+            <option value="pattern_mult">Pattern Mult</option>
+            <option value="fixed">Fixed</option>
           </select>
         </div>
       </div>
 
       <div class="row">
         <div>
-          <label>Minimum pips (SL &amp; TP floor)</label>
-          <input id="min_pips" type="number" value="50"/>
+          <label>Min pips</label>
+          <input id="min_pips" type="number"/>
         </div>
-
         <div>
-          <label>SL buffer pips (beyond candle high/low)</label>
-          <input id="sl_buffer_pips" type="number" value="5"/>
+          <label>SL buffer</label>
+          <input id="sl_buffer_pips" type="number"/>
         </div>
       </div>
 
       <div class="row">
         <div>
-          <label>RR (used if TP Mode = RR)</label>
-          <input id="rr" type="number" step="0.1" value="1.0"/>
+          <label>RR</label>
+          <input id="rr" type="number" step="0.1"/>
         </div>
-
         <div>
-          <label>Pattern TP Multiplier</label>
-          <input id="pattern_tp_mult" type="number" step="0.1" value="1.5"/>
+          <label>Pattern TP Mult</label>
+          <input id="pattern_tp_mult" type="number" step="0.1"/>
         </div>
       </div>
 
       <div class="row">
         <div>
           <label>Fixed SL pips</label>
-          <input id="fixed_sl_pips" type="number" value="50"/>
+          <input id="fixed_sl_pips" type="number"/>
         </div>
-
         <div>
           <label>Fixed TP pips</label>
-          <input id="fixed_tp_pips" type="number" value="50"/>
+          <input id="fixed_tp_pips" type="number"/>
         </div>
       </div>
 
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="margin-top:14px;display:flex;gap:10px;">
         <button id="saveBtn">Save Settings</button>
         <button id="copyKeyBtn" class="secondary">Copy API Key</button>
       </div>
 
       <div id="msg2" class="toast"></div>
+    </div>
+
+    <!-- MT5 ONBOARDING -->
+    <div class="card">
+      <h2>MT5 Setup (Plug & Play)</h2>
+      <div class="small">Follow these steps to connect your EA.</div>
+      <hr/>
+
+      <h3>Step 1 — Copy your API key</h3>
+      <button onclick="copyKey()">Copy API Key</button>
+
+      <h3 style="margin-top:18px;">Step 2 — Install the EA</h3>
+      <ol class="small">
+        <li>Open MT5</li>
+        <li>File → Open Data Folder</li>
+        <li>MQL5 → Experts</li>
+        <li>Copy EA file there</li>
+        <li>Restart MT5</li>
+      </ol>
+      <a href="#" class="secondary">Download EA (BinaryScalper.ex5)</a>
+
+      <h3 style="margin-top:18px;">Step 3 — Allow WebRequest</h3>
+      <ol class="small">
+        <li>MT5 → Tools → Options → Expert Advisors</li>
+        <li>Enable “Allow WebRequest for listed URLs”</li>
+        <li>Add:</li>
+      </ol>
+      <code>https://api.676trades.org</code>
+
+      <h3 style="margin-top:18px;">Step 4 — Attach EA</h3>
+      <ol class="small">
+        <li>Open chart (example: XAUUSD M5)</li>
+        <li>Drag EA onto chart</li>
+        <li>Paste API key into EA inputs</li>
+        <li>Enable Algo Trading</li>
+      </ol>
+
+      <h3 style="margin-top:18px;">Step 5 — Confirm connection</h3>
+      <div class="small">Check MT5 → Experts tab for “Backend ok”</div>
+      <button class="secondary" onclick="refresh()">Test Backend Now</button>
     </div>
   </div>
 
@@ -127,110 +158,56 @@
     const msg = document.getElementById("msg");
     const msg2 = document.getElementById("msg2");
 
-    function requireLogin(){
-      if(!getToken()){
-        window.location.href="/login.html";
-        return false;
-      }
-      return true;
+    function copyKey(){
+      navigator.clipboard.writeText(getToken());
+      msg2.textContent = "API key copied.";
     }
 
-    function pickPairs(statusObj){
-      return (statusObj.pairs || statusObj.pair || "XAUUSD");
-    }
+    function fill(s){
+      document.getElementById("pairs").value = s.pairs || s.pair;
+      document.getElementById("lot").value = s.lot_size;
+      document.getElementById("sl_mode").value = s.sl_mode;
+      document.getElementById("tp_mode").value = s.tp_mode;
+      document.getElementById("min_pips").value = s.min_pips;
+      document.getElementById("sl_buffer_pips").value = s.sl_buffer_pips;
+      document.getElementById("rr").value = s.rr;
+      document.getElementById("pattern_tp_mult").value = s.pattern_tp_mult;
+      document.getElementById("fixed_sl_pips").value = s.fixed_sl_pips;
+      document.getElementById("fixed_tp_pips").value = s.fixed_tp_pips;
 
-    function fillForm(s){
-      const pairsVal = pickPairs(s);
+      document.getElementById("pairsText").textContent = s.pairs || s.pair;
+      document.getElementById("lotText").textContent = s.lot_size;
 
-      document.getElementById("pairs").value = pairsVal;
-      document.getElementById("lot").value = (s.lot_size ?? 0.01);
-
-      document.getElementById("sl_mode").value = (s.sl_mode || "dynamic");
-      document.getElementById("tp_mode").value = (s.tp_mode || "rr");
-
-      document.getElementById("min_pips").value = (s.min_pips ?? 50);
-      document.getElementById("sl_buffer_pips").value = (s.sl_buffer_pips ?? 5);
-
-      document.getElementById("rr").value = (s.rr ?? 1.0);
-      document.getElementById("pattern_tp_mult").value = (s.pattern_tp_mult ?? 1.5);
-
-      document.getElementById("fixed_sl_pips").value = (s.fixed_sl_pips ?? 50);
-      document.getElementById("fixed_tp_pips").value = (s.fixed_tp_pips ?? 50);
-
-      const badge = document.getElementById("statusBadge");
-      badge.textContent = s.enabled ? "ON" : "OFF";
-      badge.className = "badge " + (s.enabled ? "ok" : "off");
-
-      document.getElementById("pairsText").textContent = pairsVal;
-      document.getElementById("lotText").textContent = (s.lot_size ?? "-");
+      const b = document.getElementById("statusBadge");
+      b.textContent = s.enabled ? "ON" : "OFF";
+      b.className = "badge " + (s.enabled ? "ok" : "off");
     }
 
     async function refresh(){
       msg.textContent = "Loading...";
       try{
-        const s = await api("/api/v1/status","GET");
-        fillForm(s);
+        const s = await api("/api/v1/status");
+        fill(s);
         msg.textContent = "";
-      }catch(e){
-        msg.textContent = "Error: " + e.message;
-      }
+      }catch(e){ msg.textContent = e.message; }
     }
 
-    document.getElementById("refreshBtn").onclick = refresh;
+    document.getElementById("startBtn").onclick = ()=>api("/api/v1/toggle","POST",{enabled:true}).then(refresh);
+    document.getElementById("stopBtn").onclick  = ()=>api("/api/v1/toggle","POST",{enabled:false}).then(refresh);
+    document.getElementById("saveBtn").onclick  = ()=>api("/api/v1/settings","POST",{
+      pairs: document.getElementById("pairs").value,
+      lot_size: Number(document.getElementById("lot").value),
+      sl_mode: document.getElementById("sl_mode").value,
+      tp_mode: document.getElementById("tp_mode").value,
+      min_pips: Number(document.getElementById("min_pips").value),
+      sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
+      rr: Number(document.getElementById("rr").value),
+      pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
+      fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
+      fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
+    }).then(()=>msg2.textContent="Saved.");
 
-    document.getElementById("startBtn").onclick = async ()=>{
-      msg.textContent = "Starting...";
-      try{
-        await api("/api/v1/toggle","POST",{ enabled:true });
-        await refresh();
-        msg.textContent = "Started.";
-      }catch(e){ msg.textContent = "Error: " + e.message; }
-    };
-
-    document.getElementById("stopBtn").onclick = async ()=>{
-      msg.textContent = "Stopping...";
-      try{
-        await api("/api/v1/toggle","POST",{ enabled:false });
-        await refresh();
-        msg.textContent = "Stopped.";
-      }catch(e){ msg.textContent = "Error: " + e.message; }
-    };
-
-    document.getElementById("saveBtn").onclick = async ()=>{
-      msg2.textContent = "Saving...";
-      try{
-        await api("/api/v1/settings","POST",{
-          pairs: document.getElementById("pairs").value.trim(),
-          lot_size: Number(document.getElementById("lot").value),
-
-          sl_mode: document.getElementById("sl_mode").value,
-          tp_mode: document.getElementById("tp_mode").value,
-
-          min_pips: Number(document.getElementById("min_pips").value),
-          sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
-
-          rr: Number(document.getElementById("rr").value),
-          pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
-
-          fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
-          fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
-        });
-
-        msg2.textContent = "Saved. EA will pick this up on next poll.";
-        await refresh();
-      }catch(e){
-        msg2.textContent = "Error: " + e.message;
-      }
-    };
-
-    document.getElementById("copyKeyBtn").onclick = async ()=>{
-      const key = getToken();
-      await navigator.clipboard.writeText(key);
-      msg2.textContent = "API key copied.";
-      setTimeout(()=>msg2.textContent="",1200);
-    };
-
-    if(requireLogin()) refresh();
+    refresh();
   </script>
 </body>
 </html>
