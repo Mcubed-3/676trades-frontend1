@@ -10,25 +10,82 @@
   <div class="container">
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;">
+      <div style="display:flex;gap:12px;align-items:center;">
         <a href="/dashboard.html">Dashboard</a>
-        <a href="/account.html">Account</a>
+        <a href="/account2.html">Account</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
 
     <div class="card">
       <h1>Billing</h1>
-      <div class="small">
-        Payments will be added here (Stripe or Lemon Squeezy). For now, this page is a placeholder.
-      </div>
+      <div class="small">Start your 5-day free trial by subscribing.</div>
       <hr/>
-      <div class="small">
-        Next: we’ll add “subscription required to enable trading” and your backend will enforce it.
+
+      <div id="statusBox" class="small">Loading billing status...</div>
+
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="subscribeBtn">Start 5-day free trial</button>
+        <button id="refreshBtn" class="secondary">Refresh</button>
       </div>
+
+      <div id="msg" class="toast"></div>
     </div>
   </div>
 
   <script src="app.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+    const box = document.getElementById("statusBox");
+
+    function requireLogin(){
+      if(!getToken()){
+        window.location.href="/login.html";
+        return false;
+      }
+      return true;
+    }
+
+    async function loadStatus(){
+      msg.textContent = "";
+      box.textContent = "Loading billing status...";
+      try{
+        const s = await api("/billing/status","GET");
+        box.innerHTML =
+          `<b>Plan:</b> ${s.plan}<br/>` +
+          `<b>Status:</b> ${s.subscription_status}<br/>` +
+          `<b>Access:</b> ${s.has_access ? "✅ Allowed" : "❌ Locked"}<br/>` +
+          (s.trial_ends_at ? `<b>Trial ends:</b> ${s.trial_ends_at}<br/>` : "") +
+          (s.current_period_end ? `<b>Period end:</b> ${s.current_period_end}<br/>` : "");
+
+      }catch(e){
+        box.textContent = "Error: " + e.message;
+      }
+    }
+
+    document.getElementById("refreshBtn").onclick = loadStatus;
+
+    document.getElementById("subscribeBtn").onclick = async ()=>{
+      msg.textContent = "Creating checkout...";
+      try{
+        const r = await api("/billing/checkout","POST",{});
+        msg.textContent = "Redirecting to checkout...";
+        window.location.href = r.checkout_url;
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
+
+    if(requireLogin()){
+      loadStatus();
+      if(new URLSearchParams(location.search).get("success")){
+        msg.textContent = "✅ Checkout complete. Refreshing status...";
+        setTimeout(loadStatus, 800);
+      }
+      if(new URLSearchParams(location.search).get("canceled")){
+        msg.textContent = "Checkout canceled.";
+      }
+    }
+  </script>
 </body>
 </html>
