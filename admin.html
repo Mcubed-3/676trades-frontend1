@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Admin</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .grid2{display:grid;grid-template-columns:1.2fr 0.8fr;gap:16px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;vertical-align:top}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.12)}
+    .pill.ok{background:rgba(0,255,140,.12)}
+    .pill.bad{background:rgba(255,80,80,.12)}
+    .pill.warn{background:rgba(255,200,0,.12)}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .clickrow{cursor:pointer}
+    .clickrow:hover{background:rgba(255,255,255,.03)}
+    .muted{opacity:.75}
+    input,button{max-width:100%}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b> <span class="muted">Admin</span></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="#" onclick="logoutUser()">Logout user</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Admin Console</h1>
+      <div class="small">View users + EA connectivity (heartbeat) + recent trades.</div>
+      <hr/>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button id="setAdminTokenBtn" class="secondary">Set Admin Token</button>
+        <input id="q" placeholder="Search email..." style="min-width:240px;"/>
+        <button id="refreshBtn">Refresh</button>
+        <span id="msg" class="small"></span>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <!-- USERS -->
+      <div class="card">
+        <h2 style="margin-top:0;">Users</h2>
+        <div class="small muted">Click a row to view details.</div>
+        <div style="overflow:auto;margin-top:12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Sub</th>
+                <th>EA</th>
+                <th>Pairs</th>
+                <th>Last seen</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DETAILS -->
+      <div class="card">
+        <h2 style="margin-top:0;">User details</h2>
+        <div id="details" class="small muted">Select a user.</div>
+
+        <div style="margin-top:14px;">
+          <h3 style="margin:10px 0;">Recent trades</h3>
+          <div id="trades" class="small muted">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Keep admin token separate from user apiKey
+    function getAdminToken(){ return sessionStorage.getItem("adminToken") || ""; }
+    function setAdminToken(t){ sessionStorage.setItem("adminToken", t); }
+
+    function logoutUser(){
+      localStorage.removeItem("apiKey");
+      window.location.href="/login.html";
+    }
+
+    async function adminFetch(path, method="GET", body=null){
+      const token = getAdminToken();
+      if(!token) throw new Error("Admin token not set. Click 'Set Admin Token'.");
+
+      const headers = { "Content-Type":"application/json", "X-Admin-Token": token };
+      const res = await fetch(`${BACKEND}${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null
+      });
+
+      const text = await res.text();
+      let data;
+      try{ data = JSON.parse(text); } catch(e){ data = { raw:text }; }
+      if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function pill(text, cls){
+      return `<span class="pill ${cls}">${text}</span>`;
+    }
+
+    function fmt(dt){
+      if(!dt) return "—";
+      try{ return new Date(dt).toLocaleString(); }catch(e){ return dt; }
+    }
+
+    async function loadUsers(){
+      const msg = document.getElementById("msg");
+      msg.textContent = "Loading users...";
+      const q = document.getElementById("q").value.trim();
+      const data = await adminFetch(`/admin/users${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+      const body = document.getElementById("usersBody");
+      body.innerHTML = "";
+
+      for(const u of data.items){
+        const plan = u.plan || "free";
+        const sub = u.subscription_status || "none";
+
+        const planP = plan === "pro" ? pill("pro","ok") : pill("free","warn");
+
+        let subCls = "warn";
+        if(sub === "active") subCls = "ok";
+        if(sub === "past_due") subCls = "warn";
+        if(sub === "canceled") subCls = "bad";
+        const subP = pill(sub, subCls);
+
+        const eaP = u.online ? pill("online","ok") : pill("offline","bad");
+        const lastSeen = fmt(u.last_seen_at);
+
+        const tr = document.createElement("tr");
+        tr.className = "clickrow";
+        tr.innerHTML = `
+          <td class="mono">${u.id}</td>
+          <td>${u.email}</td>
+          <td>${planP}</td>
+          <td>${subP}</td>
+          <td>${eaP}</td>
+          <td class="mono">${u.pairs || ""}</td>
+          <td>${lastSeen}</td>
+        `;
+        tr.onclick = () => loadUser(u.id);
+        body.appendChild(tr);
+      }
+
+      msg.textContent = `Loaded ${data.items.length} user(s).`;
+    }
+
+    async function loadUser(id){
+      const details = document.getElementById("details");
+      const trades = document.getElementById("trades");
+      details.textContent = "Loading user...";
+      trades.textContent = "Loading trades...";
+
+      const data = await adminFetch(`/admin/user/${id}/activity`);
+      const u = data.user;
+
+      details.innerHTML = `
+        <div><b>ID:</b> <span class="mono">${u.id}</span></div>
+        <div><b>Email:</b> ${u.email}</div>
+        <div><b>Plan:</b> <span class="mono">${u.plan}</span></div>
+        <div><b>Subscription:</b> <span class="mono">${u.subscription_status}</span></div>
+        <div><b>Enabled:</b> <span class="mono">${u.enabled}</span></div>
+        <div><b>Pairs:</b> <span class="mono">${u.pairs}</span></div>
+        <div><b>Lot:</b> <span class="mono">${u.lot_size}</span></div>
+        <hr/>
+        <div><b>Created:</b> ${fmt(u.created_at)}</div>
+        <div><b>Last login:</b> ${fmt(u.last_login_at)}</div>
+        <div><b>Last settings update:</b> ${fmt(u.last_settings_at)}</div>
+        <hr/>
+        <div><b>Last EA heartbeat:</b> ${fmt(u.last_seen_at)}</div>
+        <div><b>EA symbol:</b> <span class="mono">${u.last_seen_symbol || "—"}</span></div>
+        <div><b>EA TF:</b> <span class="mono">${u.last_seen_tf || "—"}</span></div>
+        <div><b>Last IP:</b> <span class="mono">${u.last_seen_ip || "—"}</span></div>
+      `;
+
+      if(!data.trades || data.trades.length === 0){
+        trades.textContent = "No trades posted yet.";
+        return;
+      }
+
+      trades.innerHTML = data.trades.slice(0, 12).map(t => `
+        <div style="padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:10px;">
+          <div><b>${t.symbol}</b> <span class="mono">${t.side}</span> | vol <span class="mono">${t.volume}</span></div>
+          <div class="muted">Opened: ${fmt(t.opened_at)}</div>
+          <div class="mono muted">entry ${t.entry ?? "—"} | sl ${t.sl ?? "—"} | tp ${t.tp ?? "—"}</div>
+          <div>profit: <span class="mono">${t.profit ?? "—"}</span></div>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("setAdminTokenBtn").onclick = () => {
+      const t = prompt("Paste ADMIN_TOKEN (stored only in this browser session):", getAdminToken());
+      if(t) setAdminToken(t.trim());
+    };
+
+    document.getElementById("refreshBtn").onclick = loadUsers;
+    document.getElementById("q").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") loadUsers();
+    });
+
+    // start
+    loadUsers().catch(e => document.getElementById("msg").textContent = "Error: " + e.message);
+  </script>
+</body>
+</html>
