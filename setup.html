@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Setup</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/account2.html">Account</a>
+        <a href="/billing.html">Billing</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>MT5 Setup (Plug & Play)</h1>
+      <div class="small">
+        Follow the steps below to install the EA and connect it to your 676Trades account.
+      </div>
+      <hr/>
+
+      <!-- STEP 0: CHECK LOGIN -->
+      <div class="toast" id="msg"></div>
+
+      <!-- STEP 1 -->
+      <h2 style="margin-top:18px;">Step 1 — Copy your API key</h2>
+      <div class="small">This key links your EA to your 676Trades account.</div>
+
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="copyKeyBtn" class="secondary">Copy API Key</button>
+        <button id="refreshBtn" class="secondary">Refresh Status</button>
+      </div>
+
+      <div class="kv" style="margin-top:12px;">
+        <div><b>Plan</b><span id="planText">-</span></div>
+        <div><b>Status</b><span id="subText">-</span></div>
+        <div><b>Trial ends</b><span id="trialText">-</span></div>
+      </div>
+
+      <hr style="margin-top:18px;"/>
+
+      <!-- STEP 2 -->
+      <h2>Step 2 — Download / Install the EA</h2>
+      <div class="small">
+        Put the EA file into your MetaTrader 5 Experts folder and restart MT5.
+      </div>
+
+      <div style="margin-top:10px;" class="small">
+        <ol style="line-height:1.6;">
+          <li>Open MT5</li>
+          <li>Click <b>File → Open Data Folder</b></li>
+          <li>Go to <b>MQL5 → Experts</b></li>
+          <li>Copy the EA file into that folder</li>
+          <li>Restart MT5</li>
+        </ol>
+      </div>
+
+      <div style="margin-top:12px;">
+        <!-- Replace this link with your real EA location -->
+        <a class="secondary" href="/downloads/BinaryScalper.ex5" download
+           style="display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);text-decoration:none;">
+          Download EA (BinaryScalper.ex5)
+        </a>
+        <div class="small" style="margin-top:6px;opacity:.8;">
+          If you don’t host the EA file here yet, replace this link with Google Drive/GitHub release.
+        </div>
+      </div>
+
+      <hr style="margin-top:18px;"/>
+
+      <!-- STEP 3 -->
+      <h2>Step 3 — Allow WebRequest to 676Trades</h2>
+      <div class="small">
+        MT5 blocks web calls by default. You must whitelist the API URL.
+      </div>
+
+      <div style="margin-top:10px;" class="small">
+        <ol style="line-height:1.6;">
+          <li>MT5 → <b>Tools → Options → Expert Advisors</b></li>
+          <li>Tick <b>“Allow WebRequest for listed URL”</b></li>
+          <li>Click <b>Add</b> and paste:</li>
+        </ol>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+          <code id="apiUrl" style="padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.06);">
+            https://api.676trades.org
+          </code>
+          <button id="copyUrlBtn" class="secondary">Copy URL</button>
+        </div>
+      </div>
+
+      <hr style="margin-top:18px;"/>
+
+      <!-- STEP 4 -->
+      <h2>Step 4 — Attach EA to a chart</h2>
+      <div class="small">
+        Add the EA to the chart you want it to trade (ex: XAUUSD M5).
+      </div>
+
+      <div style="margin-top:10px;" class="small">
+        <ol style="line-height:1.6;">
+          <li>Open a chart (example: <b>XAUUSD</b>)</li>
+          <li>Set timeframe (example: <b>M5</b>)</li>
+          <li>Drag the EA from <b>Navigator → Experts</b> onto the chart</li>
+          <li>In EA Inputs, paste your <b>API_KEY</b> (the one you copied above)</li>
+          <li>Enable <b>Algo Trading</b> (top toolbar)</li>
+        </ol>
+      </div>
+
+      <hr style="margin-top:18px;"/>
+
+      <!-- STEP 5 -->
+      <h2>Step 5 — Confirm connection (Experts tab)</h2>
+      <div class="small">
+        In MT5, open: <b>Toolbox → Experts</b> and look for:
+        <b>“Backend ok”</b> or <b>HTTP 200</b>.
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="testBtn">Test Backend Now</button>
+      </div>
+
+      <div id="testOut" class="toast" style="margin-top:10px;"></div>
+
+      <hr style="margin-top:18px;"/>
+
+      <h2>Common fixes</h2>
+      <div class="small" style="line-height:1.7;">
+        <b>401 Invalid API key:</b> Login again and copy the new key, then paste it into the EA inputs.<br/>
+        <b>CORS / Failed to fetch:</b> Make sure your frontend uses <code>https://api.676trades.org</code> and backend CORS allows <code>https://676trades.org</code>.<br/>
+        <b>WebRequest blocked in MT5:</b> Add the URL in Expert Advisors settings (Step 3).<br/>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+
+    function requireLogin(){
+      if(!getToken()){
+        window.location.href="/login.html";
+        return false;
+      }
+      return true;
+    }
+
+    async function refreshSub(){
+      try{
+        // If you already have /billing/status, use it.
+        const s = await api("/billing/status","GET");
+        document.getElementById("planText").textContent = s.plan || "free";
+        document.getElementById("subText").textContent = s.subscription_status || "none";
+        document.getElementById("trialText").textContent = s.trial_ends_at || "-";
+      }catch(e){
+        // Not fatal — setup page can still work without billing status
+        document.getElementById("planText").textContent = "-";
+        document.getElementById("subText").textContent = "-";
+        document.getElementById("trialText").textContent = "-";
+      }
+    }
+
+    document.getElementById("copyKeyBtn").onclick = async ()=>{
+      const key = getToken();
+      if(!key){ msg.textContent = "Not logged in."; return; }
+      await navigator.clipboard.writeText(key);
+      msg.textContent = "API key copied.";
+      setTimeout(()=>msg.textContent="",1200);
+    };
+
+    document.getElementById("copyUrlBtn").onclick = async ()=>{
+      await navigator.clipboard.writeText("https://api.676trades.org");
+      msg.textContent = "API URL copied.";
+      setTimeout(()=>msg.textContent="",1200);
+    };
+
+    document.getElementById("refreshBtn").onclick = async ()=>{
+      msg.textContent = "Refreshing...";
+      await refreshSub();
+      msg.textContent = "";
+    };
+
+    document.getElementById("testBtn").onclick = async ()=>{
+      const out = document.getElementById("testOut");
+      out.textContent = "Testing backend...";
+      try{
+        const s = await api("/api/v1/status","GET");
+        out.textContent = "✅ Backend OK. enabled=" + (s.enabled ? "true":"false") + " pairs=" + (s.pairs || s.pair);
+      }catch(e){
+        out.textContent = "❌ Backend test failed: " + e.message;
+      }
+    };
+
+    if(requireLogin()){
+      refreshSub();
+    }
+  </script>
+</body>
+</html>
