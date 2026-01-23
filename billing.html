@@ -19,13 +19,18 @@
 
     <div class="card">
       <h1>Billing</h1>
-      <div class="small">Start your 5-day free trial by subscribing.</div>
+      <div class="small">Start your free trial, manage your subscription, and view status.</div>
       <hr/>
 
-      <div id="statusBox" class="small">Loading billing status...</div>
+      <div class="kv">
+        <div><b>Plan</b><span id="planText">-</span></div>
+        <div><b>Status</b><span id="statusText">-</span></div>
+        <div><b>Trial ends</b><span id="trialText">-</span></div>
+      </div>
 
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="subscribeBtn">Start 5-day free trial</button>
+        <button id="subscribeBtn">Start Free Trial / Subscribe</button>
+        <button id="manageBtn" class="secondary">Manage Billing</button>
         <button id="refreshBtn" class="secondary">Refresh</button>
       </div>
 
@@ -36,7 +41,6 @@
   <script src="app.js"></script>
   <script>
     const msg = document.getElementById("msg");
-    const box = document.getElementById("statusBox");
 
     function requireLogin(){
       if(!getToken()){
@@ -46,46 +50,52 @@
       return true;
     }
 
-    async function loadStatus(){
-      msg.textContent = "";
-      box.textContent = "Loading billing status...";
+    async function loadBilling(){
+      msg.textContent = "Loading billing status...";
       try{
-        const s = await api("/billing/status","GET");
-        box.innerHTML =
-          `<b>Plan:</b> ${s.plan}<br/>` +
-          `<b>Status:</b> ${s.subscription_status}<br/>` +
-          `<b>Access:</b> ${s.has_access ? "✅ Allowed" : "❌ Locked"}<br/>` +
-          (s.trial_ends_at ? `<b>Trial ends:</b> ${s.trial_ends_at}<br/>` : "") +
-          (s.current_period_end ? `<b>Period end:</b> ${s.current_period_end}<br/>` : "");
+        // ✅ this endpoint MUST exist in your backend
+        // If yours is different, change the path here.
+        const data = await api("/billing/status", "GET");
 
+        document.getElementById("planText").textContent = data.plan || "-";
+        document.getElementById("statusText").textContent = data.subscription_status || "-";
+        document.getElementById("trialText").textContent = data.trial_ends_at || "-";
+
+        msg.textContent = "";
       }catch(e){
-        box.textContent = "Error: " + e.message;
+        msg.textContent = "Error: " + e.message;
       }
     }
 
-    document.getElementById("refreshBtn").onclick = loadStatus;
+    document.getElementById("refreshBtn").onclick = loadBilling;
 
     document.getElementById("subscribeBtn").onclick = async ()=>{
-      msg.textContent = "Creating checkout...";
+      msg.textContent = "Creating checkout session...";
       try{
-        const r = await api("/billing/checkout","POST",{});
-        msg.textContent = "Redirecting to checkout...";
-        window.location.href = r.checkout_url;
+        // ✅ this endpoint MUST exist in your backend
+        // It should return: { url: "https://checkout.stripe.com/..." }
+        const data = await api("/billing/create-checkout-session", "POST", {});
+        if(!data.url) throw new Error("Backend did not return a checkout url");
+        window.location.href = data.url;
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
     };
 
-    if(requireLogin()){
-      loadStatus();
-      if(new URLSearchParams(location.search).get("success")){
-        msg.textContent = "✅ Checkout complete. Refreshing status...";
-        setTimeout(loadStatus, 800);
+    document.getElementById("manageBtn").onclick = async ()=>{
+      msg.textContent = "Opening billing portal...";
+      try{
+        // ✅ this endpoint MUST exist in your backend
+        // It should return: { url: "https://billing.stripe.com/..." }
+        const data = await api("/billing/create-portal-session", "POST", {});
+        if(!data.url) throw new Error("Backend did not return a portal url");
+        window.location.href = data.url;
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
       }
-      if(new URLSearchParams(location.search).get("canceled")){
-        msg.textContent = "Checkout canceled.";
-      }
-    }
+    };
+
+    if(requireLogin()) loadBilling();
   </script>
 </body>
 </html>
