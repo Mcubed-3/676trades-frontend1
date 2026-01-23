@@ -27,6 +27,10 @@
         <div><b>Status</b><span id="statusBadge" class="badge off">OFF</span></div>
         <div><b>Pairs</b><span id="pairsText">-</span></div>
         <div><b>Lot size</b><span id="lotText">-</span></div>
+
+        <!-- ✅ Heartbeat indicator -->
+        <div><b>EA</b><span id="eaBadge" class="badge off">OFFLINE</span></div>
+        <div><b>Last seen</b><span id="eaLastSeen">-</span></div>
       </div>
 
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -164,23 +168,47 @@
     }
 
     function fill(s){
-      document.getElementById("pairs").value = s.pairs || s.pair;
-      document.getElementById("lot").value = s.lot_size;
-      document.getElementById("sl_mode").value = s.sl_mode;
-      document.getElementById("tp_mode").value = s.tp_mode;
-      document.getElementById("min_pips").value = s.min_pips;
-      document.getElementById("sl_buffer_pips").value = s.sl_buffer_pips;
-      document.getElementById("rr").value = s.rr;
-      document.getElementById("pattern_tp_mult").value = s.pattern_tp_mult;
-      document.getElementById("fixed_sl_pips").value = s.fixed_sl_pips;
-      document.getElementById("fixed_tp_pips").value = s.fixed_tp_pips;
+      const pairsVal = (s.pairs || s.pair || "XAUUSD");
 
-      document.getElementById("pairsText").textContent = s.pairs || s.pair;
-      document.getElementById("lotText").textContent = s.lot_size;
+      document.getElementById("pairs").value = pairsVal;
+      document.getElementById("lot").value = s.lot_size ?? 0.01;
+      document.getElementById("sl_mode").value = s.sl_mode ?? "dynamic";
+      document.getElementById("tp_mode").value = s.tp_mode ?? "rr";
+      document.getElementById("min_pips").value = s.min_pips ?? 50;
+      document.getElementById("sl_buffer_pips").value = s.sl_buffer_pips ?? 5;
+      document.getElementById("rr").value = s.rr ?? 1.0;
+      document.getElementById("pattern_tp_mult").value = s.pattern_tp_mult ?? 1.5;
+      document.getElementById("fixed_sl_pips").value = s.fixed_sl_pips ?? 50;
+      document.getElementById("fixed_tp_pips").value = s.fixed_tp_pips ?? 50;
+
+      document.getElementById("pairsText").textContent = pairsVal;
+      document.getElementById("lotText").textContent = (s.lot_size ?? "-");
 
       const b = document.getElementById("statusBadge");
       b.textContent = s.enabled ? "ON" : "OFF";
       b.className = "badge " + (s.enabled ? "ok" : "off");
+
+      // ✅ Heartbeat UI
+      const eaBadge = document.getElementById("eaBadge");
+      const eaLastSeen = document.getElementById("eaLastSeen");
+
+      if (s.last_seen_at) {
+        const last = new Date(s.last_seen_at);
+        const diffSec = (Date.now() - last.getTime()) / 1000;
+
+        // connected if heartbeat within 180 seconds
+        const connected = diffSec <= 180;
+
+        eaBadge.textContent = connected ? "CONNECTED" : "OFFLINE";
+        eaBadge.className = "badge " + (connected ? "ok" : "off");
+
+        const sym = s.last_seen_symbol ? ` (${s.last_seen_symbol})` : "";
+        eaLastSeen.textContent = last.toLocaleString() + sym;
+      } else {
+        eaBadge.textContent = "OFFLINE";
+        eaBadge.className = "badge off";
+        eaLastSeen.textContent = "-";
+      }
     }
 
     async function refresh(){
@@ -189,25 +217,45 @@
         const s = await api("/api/v1/status");
         fill(s);
         msg.textContent = "";
-      }catch(e){ msg.textContent = e.message; }
+      }catch(e){
+        msg.textContent = e.message;
+      }
     }
 
     document.getElementById("startBtn").onclick = ()=>api("/api/v1/toggle","POST",{enabled:true}).then(refresh);
     document.getElementById("stopBtn").onclick  = ()=>api("/api/v1/toggle","POST",{enabled:false}).then(refresh);
-    document.getElementById("saveBtn").onclick  = ()=>api("/api/v1/settings","POST",{
-      pairs: document.getElementById("pairs").value,
-      lot_size: Number(document.getElementById("lot").value),
-      sl_mode: document.getElementById("sl_mode").value,
-      tp_mode: document.getElementById("tp_mode").value,
-      min_pips: Number(document.getElementById("min_pips").value),
-      sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
-      rr: Number(document.getElementById("rr").value),
-      pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
-      fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
-      fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
-    }).then(()=>msg2.textContent="Saved.");
+
+    document.getElementById("saveBtn").onclick  = ()=>{
+      msg2.textContent = "Saving...";
+      return api("/api/v1/settings","POST",{
+        pairs: document.getElementById("pairs").value,
+        lot_size: Number(document.getElementById("lot").value),
+        sl_mode: document.getElementById("sl_mode").value,
+        tp_mode: document.getElementById("tp_mode").value,
+        min_pips: Number(document.getElementById("min_pips").value),
+        sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
+        rr: Number(document.getElementById("rr").value),
+        pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
+        fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
+        fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
+      }).then(()=>{
+        msg2.textContent="Saved.";
+        return refresh();
+      }).catch(e=>{
+        msg2.textContent = "Error: " + e.message;
+      });
+    };
+
+    document.getElementById("copyKeyBtn").onclick = async ()=>{
+      await navigator.clipboard.writeText(getToken());
+      msg2.textContent = "API key copied.";
+    };
+
+    document.getElementById("refreshBtn").onclick = refresh;
 
     refresh();
+    // optional auto-refresh every 30s so the EA indicator updates
+    setInterval(refresh, 30000);
   </script>
 </body>
 </html>
