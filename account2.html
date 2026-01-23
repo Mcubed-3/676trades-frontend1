@@ -7,124 +7,64 @@
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-  <div class="container">
-    <div class="nav">
-      <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <a href="/dashboard.html">Dashboard</a>
-        <a href="/setup.html">Setup</a>
-        <a href="/billing.html">Billing</a>
-        <a href="#" onclick="logout(); return false;">Logout</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <h1>Account</h1>
-      <div class="small">Manage your profile + API key.</div>
-      <hr/>
-
-      <div class="kv">
-        <div><b>Email</b><span id="email">-</span></div>
-        <div><b>Display name</b><span id="nameText">-</span></div>
-        <div><b>Created</b><span id="created">-</span></div>
-        <div><b>Last login</b><span id="last">-</span></div>
-      </div>
-
-      <div style="margin-top:16px;">
-        <label>Display name (optional)</label>
-        <input id="display_name" placeholder="e.g. Monair"/>
-        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-          <button id="saveNameBtn">Save name</button>
-          <button id="copyKeyBtn" class="secondary">Copy API key</button>
-        </div>
-      </div>
-
-      <hr style="margin-top:18px;"/>
-
-      <h2 style="margin-top:0;">Rotate API Key</h2>
-      <div class="small">
-        If your key gets exposed, rotate it. You’ll need to paste the new key into your EA again.
-      </div>
-
-      <label style="margin-top:10px;">Confirm password</label>
-      <input id="pw" type="password" placeholder="Your password"/>
-
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="rotateBtn" class="danger">Rotate key</button>
-      </div>
-
-      <div id="msg" class="toast"></div>
+<div class="container">
+  <div class="nav">
+    <div><b>676Trades</b></div>
+    <div style="display:flex;gap:12px;">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="#" onclick="logout()">Logout</a>
     </div>
   </div>
 
-  <script src="app.js"></script>
-  <script>
-    const msg = document.getElementById("msg");
+  <div class="card">
+    <h1>Account</h1>
+    <div class="small">Profile and API key management.</div>
+    <hr/>
 
-    function requireLogin(){
-      if(!getToken()){
-        window.location.href="/login.html";
-        return false;
-      }
-      return true;
-    }
+    <div class="kv">
+      <div><b>Email</b><span id="email">-</span></div>
+      <div><b>Display name</b><span id="nameText">-</span></div>
+      <div><b>Created</b><span id="created">-</span></div>
+      <div><b>Last login</b><span id="last">-</span></div>
+    </div>
 
-    function fmtDate(v){
-      if(!v) return "-";
-      try { return new Date(v).toLocaleString(); }
-      catch(e){ return v; }
-    }
+    <label>Display name</label>
+    <input id="display_name"/>
 
-    async function loadMe(){
-      msg.textContent = "Loading...";
-      try{
-        const me = await api("/account/me","GET");
-        document.getElementById("email").textContent = me.email || "-";
-        document.getElementById("nameText").textContent = me.display_name || "-";
-        document.getElementById("created").textContent = fmtDate(me.created_at);
-        document.getElementById("last").textContent = fmtDate(me.last_login_at);
-        document.getElementById("display_name").value = me.display_name || "";
-        msg.textContent = "";
-      }catch(e){
-        msg.textContent = "Error: " + e.message;
-      }
-    }
+    <div style="margin-top:12px;display:flex;gap:10px;">
+      <button id="saveNameBtn">Save</button>
+      <button onclick="navigator.clipboard.writeText(getToken())" class="secondary">Copy API Key</button>
+    </div>
 
-    document.getElementById("saveNameBtn").onclick = async ()=>{
-      msg.textContent = "Saving...";
-      try{
-        const display_name = document.getElementById("display_name").value.trim();
-        await api("/account/profile","POST",{ display_name });
-        msg.textContent = "Saved.";
-        setTimeout(()=>msg.textContent="",1200);
-        await loadMe();
-      }catch(e){
-        msg.textContent = "Error: " + e.message;
-      }
-    };
+    <hr/>
 
-    document.getElementById("copyKeyBtn").onclick = async ()=>{
-      const key = getToken();
-      await navigator.clipboard.writeText(key);
-      msg.textContent = "API key copied.";
-      setTimeout(()=>msg.textContent="",1200);
-    };
+    <h2>Rotate API Key</h2>
+    <div class="small">You must update the EA after rotating.</div>
+    <input id="pw" type="password" placeholder="Confirm password"/>
+    <button id="rotateBtn" class="danger">Rotate Key</button>
 
-    document.getElementById("rotateBtn").onclick = async ()=>{
-      msg.textContent = "Rotating...";
-      try{
-        const password = document.getElementById("pw").value.trim();
-        const email = document.getElementById("email").textContent.trim();
-        const data = await api("/auth/rotate-key","POST",{ email, password });
-        setToken(data.api_key);
-        await navigator.clipboard.writeText(data.api_key);
-        msg.textContent = "Rotated. New API key saved + copied. Update your EA inputs.";
-      }catch(e){
-        msg.textContent = "Error: " + e.message;
-      }
-    };
+    <div id="msg" class="toast"></div>
+  </div>
+</div>
 
-    if(requireLogin()) loadMe();
-  </script>
+<script src="app.js"></script>
+<script>
+  const msg = document.getElementById("msg");
+
+  async function load(){
+    const me = await api("/account/me");
+    email.textContent = me.email;
+    nameText.textContent = me.display_name || "-";
+    created.textContent = new Date(me.created_at).toLocaleString();
+    last.textContent = me.last_login_at ? new Date(me.last_login_at).toLocaleString() : "-";
+    display_name.value = me.display_name || "";
+  }
+
+  saveNameBtn.onclick = ()=>api("/account/profile","POST",{display_name:display_name.value}).then(load);
+  rotateBtn.onclick = ()=>api("/auth/rotate-key","POST",{email:email.textContent,password:pw.value})
+    .then(r=>{ setToken(r.api_key); navigator.clipboard.writeText(r.api_key); msg.textContent="Rotated."; });
+
+  load();
+</script>
 </body>
 </html>
