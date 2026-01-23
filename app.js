@@ -1,48 +1,46 @@
-const BACKEND = "https://api.676trades.org";
+// app.js (frontend helper)
 
-// Store token in browser (same key everywhere)
-function setToken(token){
-  localStorage.setItem("apiKey", token);
-}
+// Your backend API base
+window.BACKEND = "https://api.676trades.org";
 
-function getToken(){
+// Token helpers
+function getToken() {
   return localStorage.getItem("apiKey") || "";
 }
-
-function clearToken(){
-  localStorage.removeItem("apiKey");
+function setToken(t) {
+  localStorage.setItem("apiKey", t);
 }
-
-function logout(){
-  clearToken();
+function logout() {
+  localStorage.removeItem("apiKey");
   window.location.href = "/login.html";
 }
 
-// Debug helper (optional): check if token exists
-function debugToken(){
-  console.log("apiKey in localStorage =", getToken());
-}
-
-async function api(path, method="GET", body=null){
+// Core API helper
+async function api(path, method = "GET", body = null) {
   const headers = { "Content-Type": "application/json" };
 
-  const key = getToken();
-  if (key) headers["X-API-Key"] = key; // ✅ backend expects this exact header
+  const token = getToken();
+  if (token) headers["X-API-Key"] = token;
 
-  const options = { method, headers };
-
-  // ✅ only attach body for non-GET requests
-  if (body && method !== "GET") {
-    options.body = JSON.stringify(body);
-  }
-
-  const res = await fetch(`${BACKEND}${path}`, options);
+  const res = await fetch(`${window.BACKEND}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : null
+  });
 
   const text = await res.text();
-  let data;
-  try { data = JSON.parse(text); }
-  catch (e) { data = { raw: text }; }
+  let data = null;
 
-  if (!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    // Non-json error
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+  }
+
   return data;
 }
