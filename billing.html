@@ -1,5 +1,13 @@
 <script src="app.js"></script>
 <script>
+console.log("startBtn:", document.getElementById("startBtn"));
+console.log("manageBtn:", document.getElementById("manageBtn"));
+console.log("refreshBtn:", document.getElementById("refreshBtn"));
+console.log("msg:", document.getElementById("msg"));
+console.log("plan:", document.getElementById("plan"));
+console.log("status:", document.getElementById("status"));
+console.log("trial:", document.getElementById("trial"));
+
   async function refreshBilling(){
     const msg = document.getElementById("msg");
     msg.textContent = "Loading...";
@@ -40,3 +48,4 @@
 
   refreshBilling();
 </script>
+
