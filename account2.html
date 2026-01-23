@@ -5,66 +5,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>676Trades - Account</title>
   <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .badge.live { background:#16a34a; color:white; }
+    .badge.dead { background:#f59e0b; color:black; }
+  </style>
 </head>
 <body>
-<div class="container">
-  <div class="nav">
-    <div><b>676Trades</b></div>
-    <div style="display:flex;gap:12px;">
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="#" onclick="logout()">Logout</a>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Account</h1>
+      <div class="small">Manage your profile + API key.</div>
+      <hr/>
+
+      <div class="kv">
+        <div><b>Email</b><span id="email">-</span></div>
+        <div><b>Created</b><span id="created">-</span></div>
+        <div><b>Last login</b><span id="last">-</span></div>
+
+        <div><b>EA</b><span id="eaBadge" class="badge dead">Offline ⚠️</span></div>
+        <div><b>Last seen</b><span id="lastSeen">-</span></div>
+        <div><b>Last symbol</b><span id="lastSymbol">-</span></div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button id="copyKeyBtn" class="secondary">Copy API key</button>
+        </div>
+      </div>
+
+      <hr style="margin-top:18px;"/>
+
+      <h2 style="margin-top:0;">Rotate API Key</h2>
+      <div class="small">
+        If your key gets exposed, rotate it. You’ll need to paste the new key into your EA again.
+      </div>
+
+      <label style="margin-top:10px;">Confirm password</label>
+      <input id="pw" type="password" placeholder="Your password"/>
+
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="rotateBtn" class="danger">Rotate key</button>
+      </div>
+
+      <div id="msg" class="toast"></div>
     </div>
   </div>
 
-  <div class="card">
-    <h1>Account</h1>
-    <div class="small">Profile and API key management.</div>
-    <hr/>
+  <script src="app.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
 
-    <div class="kv">
-      <div><b>Email</b><span id="email">-</span></div>
-      <div><b>Display name</b><span id="nameText">-</span></div>
-      <div><b>Created</b><span id="created">-</span></div>
-      <div><b>Last login</b><span id="last">-</span></div>
-    </div>
+    function requireLogin(){
+      if(!getToken()){
+        window.location.href="/login.html";
+        return false;
+      }
+      return true;
+    }
 
-    <label>Display name</label>
-    <input id="display_name"/>
+    async function loadMe(){
+      msg.textContent = "Loading...";
+      try{
+        const me = await api("/account/me","GET");
+        document.getElementById("email").textContent = me.email || "-";
+        document.getElementById("created").textContent = me.created_at ? new Date(me.created_at).toLocaleString() : "-";
+        document.getElementById("last").textContent = me.last_login_at ? new Date(me.last_login_at).toLocaleString() : "-";
 
-    <div style="margin-top:12px;display:flex;gap:10px;">
-      <button id="saveNameBtn">Save</button>
-      <button onclick="navigator.clipboard.writeText(getToken())" class="secondary">Copy API Key</button>
-    </div>
+        const eaBadge = document.getElementById("eaBadge");
+        if(me.ea_connected){
+          eaBadge.textContent = "Connected ✅";
+          eaBadge.className = "badge live";
+        }else{
+          eaBadge.textContent = "Offline ⚠️";
+          eaBadge.className = "badge dead";
+        }
 
-    <hr/>
+        document.getElementById("lastSeen").textContent = me.last_seen_at ? new Date(me.last_seen_at).toLocaleString() : "-";
+        document.getElementById("lastSymbol").textContent = me.last_seen_symbol || "-";
 
-    <h2>Rotate API Key</h2>
-    <div class="small">You must update the EA after rotating.</div>
-    <input id="pw" type="password" placeholder="Confirm password"/>
-    <button id="rotateBtn" class="danger">Rotate Key</button>
+        msg.textContent = "";
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    }
 
-    <div id="msg" class="toast"></div>
-  </div>
-</div>
+    document.getElementById("copyKeyBtn").onclick = async ()=>{
+      const key = getToken();
+      await navigator.clipboard.writeText(key);
+      msg.textContent = "API key copied.";
+    };
 
-<script src="app.js"></script>
-<script>
-  const msg = document.getElementById("msg");
+    document.getElementById("rotateBtn").onclick = async ()=>{
+      msg.textContent = "Rotating...";
+      try{
+        const password = document.getElementById("pw").value.trim();
+        const email = document.getElementById("email").textContent.trim();
+        const data = await api("/auth/rotate-key","POST",{ email, password });
+        setToken(data.api_key);
+        msg.textContent = "Rotated. New API key saved + copied.";
+        await navigator.clipboard.writeText(data.api_key);
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
 
-  async function load(){
-    const me = await api("/account/me");
-    email.textContent = me.email;
-    nameText.textContent = me.display_name || "-";
-    created.textContent = new Date(me.created_at).toLocaleString();
-    last.textContent = me.last_login_at ? new Date(me.last_login_at).toLocaleString() : "-";
-    display_name.value = me.display_name || "";
-  }
-
-  saveNameBtn.onclick = ()=>api("/account/profile","POST",{display_name:display_name.value}).then(load);
-  rotateBtn.onclick = ()=>api("/auth/rotate-key","POST",{email:email.textContent,password:pw.value})
-    .then(r=>{ setToken(r.api_key); navigator.clipboard.writeText(r.api_key); msg.textContent="Rotated."; });
-
-  load();
-</script>
+    if(requireLogin()) loadMe();
+  </script>
 </body>
 </html>
