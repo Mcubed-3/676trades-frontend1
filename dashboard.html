@@ -11,9 +11,10 @@
     <div class="nav">
       <div><b>676Trades</b></div>
       <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/setup.html">Setup</a>
         <a href="/account2.html">Account</a>
         <a href="/billing.html">Billing</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a href="#" onclick="logout(); return false;">Logout</a>
       </div>
     </div>
 
@@ -135,7 +136,6 @@
     }
 
     function pickPairs(statusObj){
-      // Prefer "pairs" if backend supports it, else fall back to "pair"
       return (statusObj.pairs || statusObj.pair || "XAUUSD");
     }
 
@@ -227,11 +227,10 @@
       const key = getToken();
       await navigator.clipboard.writeText(key);
       msg2.textContent = "API key copied.";
+      setTimeout(()=>msg2.textContent="",1200);
     };
 
-    // init
     if(requireLogin()) refresh();
   </script>
 </body>
 </html>
-
