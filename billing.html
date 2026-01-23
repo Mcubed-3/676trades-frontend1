@@ -1,45 +1,92 @@
-<script src="app.js"></script>
-<script>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Billing</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/account2.html">Account</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
 
-  async function refreshBilling(){
-    const msg = document.getElementById("msg");
-    msg.textContent = "Loading...";
-    try{
-      const s = await api("/billing/status","GET");
-      document.getElementById("plan").textContent = s.plan || "free";
-      document.getElementById("status").textContent = s.subscription_status || "none";
-      document.getElementById("trial").textContent = s.trial_ends_at ? s.trial_ends_at : "-";
-      msg.textContent = "";
-    }catch(e){
-      msg.textContent = "Error: " + e.message;
+    <div class="card">
+      <h1>Billing</h1>
+      <div class="small">Start your free trial, manage your subscription, and view status.</div>
+      <hr/>
+
+      <div class="kv">
+        <div><b>Plan</b><span id="plan">-</span></div>
+        <div><b>Status</b><span id="status">-</span></div>
+        <div><b>Trial ends</b><span id="trial">-</span></div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="startBtn">Start Free Trial / Subscribe</button>
+        <button id="manageBtn" class="secondary">Manage Billing</button>
+        <button id="refreshBtn" class="secondary">Refresh</button>
+      </div>
+
+      <div id="msg" class="toast"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function requireLogin(){
+      if(!getToken()){
+        window.location.href="/login.html";
+        return false;
+      }
+      return true;
     }
-  }
 
-  document.getElementById("startBtn").onclick = async () => {
-    const msg = document.getElementById("msg");
-    msg.textContent = "Starting checkout...";
-    try{
-      const r = await api("/billing/create-checkout-session","POST",{});
-      window.location.href = r.url; // Stripe hosted checkout
-    }catch(e){
-      msg.textContent = "Error: " + e.message;
+    async function refreshBilling(){
+      const msg = document.getElementById("msg");
+      msg.textContent = "Loading...";
+      try{
+        const s = await api("/billing/status","GET");
+        document.getElementById("plan").textContent = s.plan || "free";
+        document.getElementById("status").textContent = s.subscription_status || "none";
+        document.getElementById("trial").textContent = s.trial_ends_at ? s.trial_ends_at : "-";
+        msg.textContent = "";
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
     }
-  };
 
-  document.getElementById("manageBtn").onclick = async () => {
-    const msg = document.getElementById("msg");
-    msg.textContent = "Opening billing portal...";
-    try{
-      const r = await api("/billing/create-portal-session","POST",{});
-      window.location.href = r.url;
-    }catch(e){
-      msg.textContent = "Error: " + e.message;
-    }
-  };
+    document.getElementById("startBtn").onclick = async () => {
+      const msg = document.getElementById("msg");
+      msg.textContent = "Starting checkout...";
+      try{
+        const r = await api("/billing/create-checkout-session","POST",{});
+        window.location.href = r.url;
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
 
-  document.getElementById("refreshBtn").onclick = refreshBilling;
+    document.getElementById("manageBtn").onclick = async () => {
+      const msg = document.getElementById("msg");
+      msg.textContent = "Opening billing portal...";
+      try{
+        const r = await api("/billing/create-portal-session","POST",{});
+        window.location.href = r.url;
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
 
-  refreshBilling();
-</script>
+    document.getElementById("refreshBtn").onclick = refreshBilling;
 
-
+    if(requireLogin()) refreshBilling();
+  </script>
+</body>
+</html>
