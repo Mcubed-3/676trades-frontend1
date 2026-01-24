@@ -62,7 +62,7 @@
       font-size:12px;cursor:help;position:relative;flex:0 0 auto;
     }
     .info .tip{
-      display:none;position:absolute;left:0;top:22px;width:260px;max-width:70vw;
+      display:none;position:absolute;left:0;top:22px;width:280px;max-width:70vw;
       z-index:30;padding:10px;border-radius:12px;
       border:1px solid rgba(255,255,255,0.12);
       background:#071024;color:rgba(255,255,255,0.92);
@@ -74,12 +74,39 @@
       .info:hover .tip{display:none;}
       .info.open .tip{display:block;}
     }
+
+    /* Pair chips */
+    .chipwrap{margin-top:10px;}
+    .chipgroup-title{margin-top:12px;font-size:12px;opacity:0.8;}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+    .chip{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);
+      color:rgba(255,255,255,0.9);
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      font-size:12px;
+    }
+    .chip:hover{background:rgba(255,255,255,0.08);}
+    .chip.on{
+      background:rgba(79,124,255,0.22);
+      border-color:rgba(79,124,255,0.55);
+    }
+    .chip small{opacity:0.75;font-weight:700;margin-left:6px;}
+    .chiprow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+    .chipbtn{
+      padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);
+      background:#0b1528;color:rgba(255,255,255,0.9);font-weight:800;cursor:pointer;
+    }
+    .chipbtn:hover{background:rgba(255,255,255,0.06);}
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- RISK / COMPLIANCE BANNER -->
     <div class="banner">
       <h3>Risk disclaimer</h3>
       <div class="muted">
@@ -108,7 +135,6 @@
       </div>
     </div>
 
-    <!-- STATUS CARD -->
     <div class="card">
       <h1>Dashboard</h1>
       <div class="small">Beginner mode: choose pairs + lot size, save, then start the algo.</div>
@@ -118,10 +144,7 @@
         <div><b>Status</b><span id="statusBadge" class="badge off">OFF</span></div>
         <div><b>Pairs</b><span id="pairsText">-</span></div>
         <div><b>Lot size</b><span id="lotText">-</span></div>
-
-        <div><b>EA</b>
-          <span id="eaBadge" class="badge dead">Offline ⚠️</span>
-        </div>
+        <div><b>EA</b><span id="eaBadge" class="badge dead">Offline ⚠️</span></div>
         <div><b>Last seen</b><span id="lastSeenText">-</span></div>
       </div>
 
@@ -135,7 +158,6 @@
       <div class="smallmuted">Tip: If EA shows Offline, open MT5 and follow the Setup page.</div>
     </div>
 
-    <!-- SETTINGS CARD (BEGINNER ONLY) -->
     <div class="card">
       <h2>Basic Settings</h2>
 
@@ -150,14 +172,32 @@
             <label style="margin:10px 0 6px;">Trading Pairs</label>
             <span class="info">i
               <span class="tip">
-                Enter symbols separated by commas. Example: XAUUSD,EURUSD.
-                Use only symbols available on your broker.
+                Click to select pairs below (multi-select), or type them separated by commas.
+                Example: XAUUSD,EURUSD.
               </span>
             </span>
           </div>
+
           <input id="pairs" placeholder="XAUUSD" value="XAUUSD"/>
-          <div class="small" style="opacity:0.85;margin-top:6px;">
-            Example: <b>XAUUSD</b> or <b>XAUUSD,EURUSD</b>
+
+          <div class="chipwrap">
+            <div class="chipgroup-title">Recommended</div>
+            <div id="chipsRecommended" class="chips"></div>
+
+            <div class="chipgroup-title">Advanced / Optional</div>
+            <div class="small" style="opacity:0.78;margin-top:6px;">
+              These can behave differently (higher volatility/spreads). Only use if you understand the risk.
+            </div>
+            <div id="chipsAdvanced" class="chips"></div>
+
+            <div class="chiprow">
+              <button id="clearPairsBtn" class="chipbtn" type="button">Clear</button>
+              <button id="chooseBeginnerBtn" class="chipbtn" type="button">Beginner set (XAUUSD)</button>
+            </div>
+          </div>
+
+          <div class="small" style="opacity:0.85;margin-top:10px;">
+            You can select multiple pairs. Keep it to 1–2 if you're new.
           </div>
         </div>
 
@@ -234,6 +274,22 @@
     const startBtn = document.getElementById("startBtn");
     const riskCheck = document.getElementById("riskCheck");
     const riskHint = document.getElementById("riskHint");
+    const pairsInput = document.getElementById("pairs");
+
+    // Beginner-friendly chip sets
+    // NOTE: symbols must exist on the broker; some brokers use BTCUSD/BTCUSDm/BTCUSD.c etc.
+    const RECOMMENDED = [
+      {sym:"XAUUSD", note:"gold"},
+      {sym:"EURUSD", note:"major"},
+      {sym:"GBPUSD", note:"major"},
+      {sym:"USDJPY", note:"major"}
+    ];
+
+    const ADVANCED = [
+      {sym:"BTCUSD", note:"crypto"},
+      {sym:"NAS100", note:"index"},
+      {sym:"US30",  note:"index"},
+    ];
 
     function requireLogin(){
       if(!getToken()){
@@ -255,21 +311,98 @@
     }
     riskCheck.addEventListener("change", updateStartGate);
 
+    function normalizePairsStr(s){
+      const parts = (s || "")
+        .split(",")
+        .map(x => x.trim().toUpperCase())
+        .filter(Boolean);
+
+      // unique preserve order
+      const seen = new Set();
+      const out = [];
+      for(const p of parts){
+        if(!seen.has(p)){
+          seen.add(p);
+          out.push(p);
+        }
+      }
+      return out.join(",");
+    }
+
+    function getPairsArray(){
+      const s = normalizePairsStr(pairsInput.value);
+      return s ? s.split(",") : [];
+    }
+
+    function setPairsArray(arr){
+      pairsInput.value = normalizePairsStr(arr.join(","));
+    }
+
+    function togglePair(sym){
+      sym = (sym || "").trim().toUpperCase();
+      if(!sym) return;
+      const arr = getPairsArray();
+      const idx = arr.indexOf(sym);
+      if(idx >= 0) arr.splice(idx, 1);
+      else arr.push(sym);
+      setPairsArray(arr);
+      renderChipsFromInput();
+    }
+
+    function renderChips(containerId, list){
+      const el = document.getElementById(containerId);
+      el.innerHTML = "";
+      const selected = new Set(getPairsArray());
+      list.forEach(item=>{
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip" + (selected.has(item.sym) ? " on" : "");
+        b.innerHTML = `${item.sym} <small>${item.note}</small>`;
+        b.onclick = ()=> togglePair(item.sym);
+        el.appendChild(b);
+      });
+    }
+
+    function renderChipsFromInput(){
+      renderChips("chipsRecommended", RECOMMENDED);
+      renderChips("chipsAdvanced", ADVANCED);
+    }
+
+    // keep chips in sync if user types manually
+    pairsInput.addEventListener("input", ()=>{
+      // do not aggressively rewrite while typing, just refresh chip active state
+      renderChipsFromInput();
+    });
+
+    pairsInput.addEventListener("blur", ()=>{
+      pairsInput.value = normalizePairsStr(pairsInput.value);
+      renderChipsFromInput();
+    });
+
+    document.getElementById("clearPairsBtn").onclick = ()=>{
+      pairsInput.value = "";
+      renderChipsFromInput();
+    };
+
+    document.getElementById("chooseBeginnerBtn").onclick = ()=>{
+      pairsInput.value = "XAUUSD";
+      renderChipsFromInput();
+    };
+
     function pickPairs(s){
       return (s.pairs || s.pair || "XAUUSD");
     }
 
     function fillForm(s){
       const pairsVal = pickPairs(s);
-
-      document.getElementById("pairs").value = pairsVal;
+      pairsInput.value = normalizePairsStr(pairsVal);
       document.getElementById("lot").value = (s.lot_size ?? 0.01);
 
       const badge = document.getElementById("statusBadge");
       badge.textContent = s.enabled ? "ON" : "OFF";
       badge.className = "badge " + (s.enabled ? "ok" : "off");
 
-      document.getElementById("pairsText").textContent = pairsVal;
+      document.getElementById("pairsText").textContent = pairsInput.value || "-";
       document.getElementById("lotText").textContent = (s.lot_size ?? "-");
 
       const eaBadge = document.getElementById("eaBadge");
@@ -284,6 +417,8 @@
       }
 
       lastSeen.textContent = s.last_seen_at ? new Date(s.last_seen_at).toLocaleString() : "-";
+
+      renderChipsFromInput();
     }
 
     async function refresh(){
@@ -329,8 +464,13 @@
     document.getElementById("saveBtn").onclick = async ()=>{
       msg2.textContent = "Saving...";
       try{
+        const pairs = normalizePairsStr(pairsInput.value);
+        if(!pairs){
+          msg2.textContent = "Please choose at least 1 pair (example: XAUUSD).";
+          return;
+        }
         await api("/api/v1/settings","POST",{
-          pairs: document.getElementById("pairs").value.trim(),
+          pairs,
           lot_size: Number(document.getElementById("lot").value)
         });
         msg2.textContent = "Saved. EA will pick this up on next poll.";
@@ -349,6 +489,7 @@
     // init
     if(requireLogin()){
       updateStartGate();
+      renderChipsFromInput();
       refresh();
     }
   </script>
