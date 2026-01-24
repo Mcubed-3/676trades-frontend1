@@ -18,82 +18,30 @@
     .clickrow{cursor:pointer}
     .clickrow:hover{background:rgba(255,255,255,.03)}
     .muted{opacity:.75}
-    input,button,select{max-width:100%}
-    .rowflex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tabbtn{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:transparent;color:inherit;cursor:pointer}
-    .tabbtn.active{background:rgba(255,255,255,.08)}
-    .chartbox{border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:12px;margin-top:10px}
-    .tiny{font-size:12px;opacity:.75}
+    input,button{max-width:100%}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="nav">
       <div><b>676Trades</b> <span class="muted">Admin</span></div>
-      <div style="display:flex;gap:12px;align-items:center;">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/setup2.html">Setup</a>
         <a href="/dashboard.html">Dashboard</a>
         <a href="#" onclick="logoutUser()">Logout user</a>
       </div>
     </div>
 
-    <!-- MODE / TOKEN -->
     <div class="card">
       <h1>Admin Console</h1>
       <div class="small">View users + EA connectivity (heartbeat) + recent trades.</div>
       <hr/>
 
-      <div class="rowflex">
-        <div class="tabs">
-          <button id="modeAdminBtn" class="tabbtn">Admin mode</button>
-          <button id="modeSupportBtn" class="tabbtn">Support mode (read-only)</button>
-        </div>
-
-        <button id="setTokenBtn" class="secondary">Set Token</button>
-
-        <span class="tiny">Mode:</span>
-        <span id="modeText" class="pill warn">—</span>
-
-        <span class="tiny">Token:</span>
-        <span id="tokenText" class="mono tiny">not set</span>
-      </div>
-
-      <div class="rowflex" style="margin-top:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button id="setAdminTokenBtn" class="secondary">Set Admin Token</button>
         <input id="q" placeholder="Search email..." style="min-width:240px;"/>
         <button id="refreshBtn">Refresh</button>
         <span id="msg" class="small"></span>
-      </div>
-
-      <div class="tiny" style="margin-top:10px;">
-        • Admin mode uses <span class="mono">X-Admin-Token</span> and calls <span class="mono">/admin/*</span><br/>
-        • Support mode uses <span class="mono">X-Support-Token</span> and calls <span class="mono">/support/*</span>
-      </div>
-    </div>
-
-    <!-- CHARTS PLACEHOLDER -->
-    <div class="card">
-      <h2 style="margin-top:0;">Charts (placeholder)</h2>
-      <div class="small muted">
-        Coming next: quick insights like online EAs, plan split, signups, and trades volume.
-      </div>
-
-      <div class="grid2" style="margin-top:12px;">
-        <div class="chartbox">
-          <div><b>EA Online vs Offline</b></div>
-          <div class="tiny">Placeholder — we’ll render a small chart here.</div>
-          <div id="chartOnline" class="tiny muted" style="margin-top:8px;">—</div>
-        </div>
-
-        <div class="chartbox">
-          <div><b>Plan split (Free vs Pro)</b></div>
-          <div class="tiny">Placeholder — we’ll render a small chart here.</div>
-          <div id="chartPlan" class="tiny muted" style="margin-top:8px;">—</div>
-        </div>
-      </div>
-
-      <div class="chartbox">
-        <div><b>Recent trades (last 50 across selected user)</b></div>
-        <div class="tiny">Placeholder — for now, view in the User details panel.</div>
       </div>
     </div>
 
@@ -131,33 +79,56 @@
         </div>
       </div>
     </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>© <span id="yr"></span> 676Trades</span>
+        <span class="dot">·</span>
+        <a href="/terms.html">Terms</a>
+        <span class="dot">·</span>
+        <a href="/privacy.html">Privacy</a>
+        <span class="dot">·</span>
+        <a href="/risk.html">Risk Disclosure</a>
+        <span class="dot">·</span>
+        <a href="mailto:support@676trades.org">Support</a>
+      </div>
+    </footer>
+
   </div>
+
+  <script>
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
 
   <script src="app.js"></script>
   <script>
-    // =========================
-    // Mode + token storage
-    // =========================
-    const MODE_KEY = "adminMode"; // "admin" | "support"
-    const ADMIN_TOKEN_KEY = "adminToken";
-    const SUPPORT_TOKEN_KEY = "supportToken";
-
-    function getMode(){ return sessionStorage.getItem(MODE_KEY) || "admin"; }
-    function setMode(m){ sessionStorage.setItem(MODE_KEY, m); updateModeUI(); }
-
-    function getAdminToken(){ return sessionStorage.getItem(ADMIN_TOKEN_KEY) || ""; }
-    function setAdminToken(t){ sessionStorage.setItem(ADMIN_TOKEN_KEY, t); }
-
-    function getSupportToken(){ return sessionStorage.getItem(SUPPORT_TOKEN_KEY) || ""; }
-    function setSupportToken(t){ sessionStorage.setItem(SUPPORT_TOKEN_KEY, t); }
-
-    function getActiveToken(){
-      return (getMode()==="support") ? getSupportToken() : getAdminToken();
-    }
+    function getAdminToken(){ return sessionStorage.getItem("adminToken") || ""; }
+    function setAdminToken(t){ sessionStorage.setItem("adminToken", t); }
 
     function logoutUser(){
       localStorage.removeItem("apiKey");
       window.location.href="/login.html";
+    }
+
+    async function adminFetch(path, method="GET", body=null){
+      const token = getAdminToken();
+      if(!token) throw new Error("Admin token not set. Click 'Set Admin Token'.");
+
+      const headers = { "Content-Type":"application/json", "X-Admin-Token": token };
+      const res = await fetch(`${BACKEND}${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null
+      });
+
+      const text = await res.text();
+      let data;
+      try{ data = JSON.parse(text); } catch(e){ data = { raw:text }; }
+      if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+      return data;
     }
 
     function pill(text, cls){
@@ -169,100 +140,19 @@
       try{ return new Date(dt).toLocaleString(); }catch(e){ return dt; }
     }
 
-    function updateModeUI(){
-      const mode = getMode();
-      const adminBtn = document.getElementById("modeAdminBtn");
-      const supportBtn = document.getElementById("modeSupportBtn");
-      adminBtn.classList.toggle("active", mode==="admin");
-      supportBtn.classList.toggle("active", mode==="support");
-
-      const modeText = document.getElementById("modeText");
-      if(mode==="support"){
-        modeText.className = "pill warn";
-        modeText.textContent = "support";
-      }else{
-        modeText.className = "pill ok";
-        modeText.textContent = "admin";
-      }
-
-      const tok = getActiveToken();
-      document.getElementById("tokenText").textContent = tok ? ("set (" + tok.slice(0,6) + "… )") : "not set";
-    }
-
-    // =========================
-    // Admin/Support fetch wrapper
-    // =========================
-    async function staffFetch(path, method="GET", body=null){
-      const mode = getMode();
-      const token = getActiveToken();
-      if(!token){
-        throw new Error((mode==="support")
-          ? "Support token not set. Click 'Set Token'."
-          : "Admin token not set. Click 'Set Token'.");
-      }
-
-      const headers = { "Content-Type":"application/json" };
-      if(mode === "support") headers["X-Support-Token"] = token;
-      else headers["X-Admin-Token"] = token;
-
-      const res = await fetch(`${BACKEND}${path}`, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : null
-      });
-
-      const text = await res.text();
-      let data;
-      try{ data = JSON.parse(text); } catch(e){ data = { raw:text }; }
-
-      if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
-      return data;
-    }
-
-    function apiPrefix(){
-      return (getMode()==="support") ? "/support" : "/admin";
-    }
-
-    // =========================
-    // Charts placeholder (text summaries for now)
-    // =========================
-    function renderChartSummaries(users){
-      const total = users.length;
-      const online = users.filter(u => !!u.online).length;
-      const offline = total - online;
-
-      const pro = users.filter(u => (u.plan||"").toLowerCase()==="pro").length;
-      const free = total - pro;
-
-      document.getElementById("chartOnline").textContent =
-        total ? `Online: ${online} | Offline: ${offline} | Total: ${total}` : "—";
-
-      document.getElementById("chartPlan").textContent =
-        total ? `Pro: ${pro} | Free: ${free} | Total: ${total}` : "—";
-    }
-
-    // =========================
-    // Load users + details
-    // =========================
     async function loadUsers(){
       const msg = document.getElementById("msg");
       msg.textContent = "Loading users...";
       const q = document.getElementById("q").value.trim();
-
-      const url = `${apiPrefix()}/users${q ? `?q=${encodeURIComponent(q)}` : ""}`;
-      const data = await staffFetch(url);
-
+      const data = await adminFetch(`/admin/users${q ? `?q=${encodeURIComponent(q)}` : ""}`);
       const body = document.getElementById("usersBody");
       body.innerHTML = "";
 
-      const items = data.items || [];
-      renderChartSummaries(items);
+      for(const u of data.items){
+        const plan = u.plan || "free";
+        const sub = u.subscription_status || "none";
 
-      for(const u of items){
-        const plan = (u.plan || "free").toLowerCase();
-        const sub = (u.subscription_status || "none").toLowerCase();
-
-        const planP = (plan === "pro") ? pill("pro","ok") : pill("free","warn");
+        const planP = plan === "pro" ? pill("pro","ok") : pill("free","warn");
 
         let subCls = "warn";
         if(sub === "active") subCls = "ok";
@@ -288,7 +178,7 @@
         body.appendChild(tr);
       }
 
-      msg.textContent = `Loaded ${items.length} user(s).`;
+      msg.textContent = `Loaded ${data.items.length} user(s).`;
     }
 
     async function loadUser(id){
@@ -297,18 +187,17 @@
       details.textContent = "Loading user...";
       trades.textContent = "Loading trades...";
 
-      const data = await staffFetch(`${apiPrefix()}/user/${id}/activity`);
-      const u = data.user || {};
+      const data = await adminFetch(`/admin/user/${id}/activity`);
+      const u = data.user;
 
-      // NOTE: support endpoints don't include last_seen_ip etc; keep graceful fallbacks.
       details.innerHTML = `
-        <div><b>ID:</b> <span class="mono">${u.id ?? "—"}</span></div>
-        <div><b>Email:</b> ${u.email ?? "—"}</div>
-        <div><b>Plan:</b> <span class="mono">${u.plan ?? "—"}</span></div>
-        <div><b>Subscription:</b> <span class="mono">${u.subscription_status ?? "—"}</span></div>
-        <div><b>Enabled:</b> <span class="mono">${u.enabled ?? "—"}</span></div>
-        <div><b>Pairs:</b> <span class="mono">${u.pairs ?? "—"}</span></div>
-        <div><b>Lot:</b> <span class="mono">${u.lot_size ?? "—"}</span></div>
+        <div><b>ID:</b> <span class="mono">${u.id}</span></div>
+        <div><b>Email:</b> ${u.email}</div>
+        <div><b>Plan:</b> <span class="mono">${u.plan}</span></div>
+        <div><b>Subscription:</b> <span class="mono">${u.subscription_status}</span></div>
+        <div><b>Enabled:</b> <span class="mono">${u.enabled}</span></div>
+        <div><b>Pairs:</b> <span class="mono">${u.pairs}</span></div>
+        <div><b>Lot:</b> <span class="mono">${u.lot_size}</span></div>
         <hr/>
         <div><b>Created:</b> ${fmt(u.created_at)}</div>
         <div><b>Last login:</b> ${fmt(u.last_login_at)}</div>
@@ -317,16 +206,15 @@
         <div><b>Last EA heartbeat:</b> ${fmt(u.last_seen_at)}</div>
         <div><b>EA symbol:</b> <span class="mono">${u.last_seen_symbol || "—"}</span></div>
         <div><b>EA TF:</b> <span class="mono">${u.last_seen_tf || "—"}</span></div>
-        ${u.last_seen_ip ? `<div><b>Last IP:</b> <span class="mono">${u.last_seen_ip}</span></div>` : ``}
+        <div><b>Last IP:</b> <span class="mono">${u.last_seen_ip || "—"}</span></div>
       `;
 
-      const list = data.trades || [];
-      if(list.length === 0){
+      if(!data.trades || data.trades.length === 0){
         trades.textContent = "No trades posted yet.";
         return;
       }
 
-      trades.innerHTML = list.slice(0, 12).map(t => `
+      trades.innerHTML = data.trades.slice(0, 12).map(t => `
         <div style="padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:10px;">
           <div><b>${t.symbol}</b> <span class="mono">${t.side}</span> | vol <span class="mono">${t.volume}</span></div>
           <div class="muted">Opened: ${fmt(t.opened_at)}</div>
@@ -336,36 +224,16 @@
       `).join("");
     }
 
-    // =========================
-    // Wiring UI
-    // =========================
-    document.getElementById("modeAdminBtn").onclick = ()=> setMode("admin");
-    document.getElementById("modeSupportBtn").onclick = ()=> setMode("support");
-
-    document.getElementById("setTokenBtn").onclick = () => {
-      const mode = getMode();
-      const current = getActiveToken();
-      const label = (mode==="support") ? "Paste SUPPORT_TOKEN (stored only in this browser session):"
-                                      : "Paste ADMIN_TOKEN (stored only in this browser session):";
-      const t = prompt(label, current);
-      if(!t) return;
-
-      if(mode==="support") setSupportToken(t.trim());
-      else setAdminToken(t.trim());
-
-      updateModeUI();
+    document.getElementById("setAdminTokenBtn").onclick = () => {
+      const t = prompt("Paste ADMIN_TOKEN (stored only in this browser session):", getAdminToken());
+      if(t) setAdminToken(t.trim());
     };
 
-    document.getElementById("refreshBtn").onclick = ()=> loadUsers().catch(e=>{
-      document.getElementById("msg").textContent = "Error: " + e.message;
-    });
-
+    document.getElementById("refreshBtn").onclick = loadUsers;
     document.getElementById("q").addEventListener("keydown", (e)=>{
-      if(e.key === "Enter") document.getElementById("refreshBtn").click();
+      if(e.key === "Enter") loadUsers();
     });
 
-    // init
-    updateModeUI();
     loadUsers().catch(e => document.getElementById("msg").textContent = "Error: " + e.message);
   </script>
 </body>
