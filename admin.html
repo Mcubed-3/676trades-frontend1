@@ -21,6 +21,7 @@
     input,button,select{max-width:100%}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:900px){.row2{grid-template-columns:1fr}}
+    .box{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:10px}
   </style>
 </head>
 <body>
@@ -35,7 +36,7 @@
 
     <div class="card">
       <h1>Admin Console</h1>
-      <div class="small">View users + EA connectivity (heartbeat) + recent trades.</div>
+      <div class="small">View users + EA connectivity (heartbeat) + recent trades + errors.</div>
       <hr/>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -78,13 +79,15 @@
           <button id="enableBtn">Force Enable EA</button>
           <button id="disableBtn" class="danger">Force Disable EA</button>
           <button id="rotateKeyBtn" class="secondary">Rotate API Key</button>
+          <button id="clearTradesBtn" class="secondary">Clear Trades</button>
+          <button id="resetPwBtn" class="secondary">Reset Password</button>
         </div>
 
         <!-- Billing override -->
         <div id="billingBox" style="display:none;margin-top:14px;">
           <hr/>
           <h3 style="margin:10px 0;">Billing override</h3>
-          <div class="small muted">Use this to grant pro manually, set status, or extend trial.</div>
+          <div class="small muted">Grant pro manually, set status, or extend trial.</div>
 
           <div class="row2" style="margin-top:10px;">
             <div>
@@ -124,6 +127,16 @@
           </div>
 
           <div id="billMsg" class="small muted" style="margin-top:8px;"></div>
+        </div>
+
+        <!-- Errors -->
+        <div id="errorsBox" style="display:none;margin-top:14px;">
+          <hr/>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <h3 style="margin:10px 0;">Errors (latest)</h3>
+            <button id="refreshErrorsBtn" class="secondary">Refresh Errors</button>
+          </div>
+          <div id="errors" class="small muted">—</div>
         </div>
 
         <div style="margin-top:14px;">
@@ -213,7 +226,27 @@
     }
 
     let currentUserId = null;
-    let currentUserEmail = "";
+
+    async function loadErrorsForUser(userId){
+      const box = document.getElementById("errorsBox");
+      const el = document.getElementById("errors");
+      box.style.display = "block";
+      el.textContent = "Loading errors...";
+      const data = await adminFetch(`/admin/errors?user_id=${userId}&limit=40`);
+
+      if(!data.items || data.items.length === 0){
+        el.textContent = "No errors logged for this user.";
+        return;
+      }
+
+      el.innerHTML = data.items.slice(0, 20).map(e => `
+        <div class="box">
+          <div><b>${e.source}</b> <span class="muted">• ${fmt(e.created_at)}</span></div>
+          <div class="mono" style="margin-top:6px;white-space:pre-wrap;">${(e.message || "").replaceAll("<","&lt;")}</div>
+          ${e.context ? `<div class="muted mono" style="margin-top:6px;white-space:pre-wrap;">${(e.context || "").replaceAll("<","&lt;")}</div>` : ""}
+        </div>
+      `).join("");
+    }
 
     async function loadUser(id){
       currentUserId = id;
@@ -228,10 +261,10 @@
       actions.style.display = "none";
       billingBox.style.display = "none";
       billMsg.textContent = "";
+      document.getElementById("errorsBox").style.display = "none";
 
       const data = await adminFetch(`/admin/user/${id}/activity`);
       const u = data.user;
-      currentUserEmail = u.email;
 
       actions.style.display = "flex";
       billingBox.style.display = "block";
@@ -271,8 +304,7 @@
       };
 
       document.getElementById("rotateKeyBtn").onclick = async () => {
-        if(!confirm(`Rotate API key for ${u.email}?\n\nThis will DISABLE the EA until the user updates their key in MT5.`)) return;
-
+        if(!confirm(`Rotate API key for ${u.email}?\n\nThis will DISABLE the EA until they update their key in MT5.`)) return;
         const r = await adminFetch(`/admin/user/${u.id}/rotate-key`, "POST", {});
         await loadUsers(); await loadUser(u.id);
 
@@ -285,7 +317,27 @@
         }
       };
 
-      // Apply billing override
+      document.getElementById("clearTradesBtn").onclick = async () => {
+        if(!confirm(`Clear ALL trades for ${u.email}?`)) return;
+        const r = await adminFetch(`/admin/user/${u.id}/clear-trades`, "POST", {});
+        document.getElementById("msg").textContent = `Deleted ${r.deleted} trade(s).`;
+        await loadUser(u.id);
+      };
+
+      document.getElementById("resetPwBtn").onclick = async () => {
+        if(!confirm(`Reset password for ${u.email}?\n\nThis will DISABLE the EA for safety.`)) return;
+        const r = await adminFetch(`/admin/user/${u.id}/reset-password`, "POST", {});
+        try{
+          await navigator.clipboard.writeText(r.temp_password);
+          alert(`Temp password copied.\n\nUser: ${r.email}`);
+        }catch(e){
+          alert(`Temp password:\n\n${r.temp_password}`);
+        }
+        document.getElementById("msg").textContent = "Password reset. Temp password copied/shown. EA disabled.";
+        await loadUsers(); await loadUser(u.id);
+      };
+
+      // Billing override
       document.getElementById("applyBillingBtn").onclick = async () => {
         const plan = document.getElementById("ovPlan").value.trim();
         const subscription_status = document.getElementById("ovSub").value.trim();
@@ -319,6 +371,10 @@
         billMsg.textContent = "";
       };
 
+      // Errors
+      document.getElementById("refreshErrorsBtn").onclick = () => loadErrorsForUser(u.id);
+      await loadErrorsForUser(u.id);
+
       // Trades
       if(!data.trades || data.trades.length === 0){
         trades.textContent = "No trades posted yet.";
@@ -326,7 +382,7 @@
       }
 
       trades.innerHTML = data.trades.slice(0, 12).map(t => `
-        <div style="padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:10px;">
+        <div class="box">
           <div><b>${t.symbol}</b> <span class="mono">${t.side}</span> | vol <span class="mono">${t.volume}</span></div>
           <div class="muted">Opened: ${fmt(t.opened_at)}</div>
           <div class="mono muted">entry ${t.entry ?? "—"} | sl ${t.sl ?? "—"} | tp ${t.tp ?? "—"}</div>
