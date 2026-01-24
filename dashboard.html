@@ -46,7 +46,7 @@
       </div>
 
       <div id="msg" class="toast"></div>
-      <div class="smallmuted">EA becomes “Connected” when it posts heartbeat recently (backend decides online/offline).</div>
+      <div class="smallmuted">EA becomes “Connected” when it posts heartbeat within the last 5 minutes.</div>
     </div>
 
     <!-- SETTINGS CARD -->
@@ -194,15 +194,6 @@
       return (s.pairs || s.pair || "XAUUSD");
     }
 
-    function fmtLastSeen(s){
-      if(!s.last_seen_at) return "-";
-      const dt = new Date(s.last_seen_at);
-      let extra = "";
-      if(s.last_seen_symbol) extra += " • " + s.last_seen_symbol;
-      if(s.last_seen_tf) extra += " • " + s.last_seen_tf;
-      return dt.toLocaleString() + extra;
-    }
-
     function fillForm(s){
       const pairsVal = pickPairs(s);
 
@@ -228,12 +219,11 @@
       document.getElementById("pairsText").textContent = pairsVal;
       document.getElementById("lotText").textContent = (s.lot_size ?? "-");
 
-      // EA heartbeat indicator (backend provides: online + last_seen_at)
+      // EA heartbeat indicator
       const eaBadge = document.getElementById("eaBadge");
       const lastSeen = document.getElementById("lastSeenText");
 
-      const online = !!s.online;
-      if(online){
+      if(s.ea_connected){
         eaBadge.textContent = "Connected ✅";
         eaBadge.className = "badge live";
       }else{
@@ -241,7 +231,7 @@
         eaBadge.className = "badge dead";
       }
 
-      lastSeen.textContent = fmtLastSeen(s);
+      lastSeen.textContent = s.last_seen_at ? new Date(s.last_seen_at).toLocaleString() : "-";
     }
 
     async function refresh(){
@@ -308,13 +298,7 @@
       msg2.textContent = "API key copied.";
     };
 
-    // auto-refresh every 15s so the heartbeat badge updates
-    let refreshTimer = null;
-
-    if(requireLogin()){
-      refresh();
-      refreshTimer = setInterval(refresh, 15000);
-    }
+    if(requireLogin()) refresh();
   </script>
 </body>
 </html>
