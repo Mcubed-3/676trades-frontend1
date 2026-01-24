@@ -27,7 +27,6 @@
 <body>
   <div class="container">
 
-    <!-- COMPLIANCE / RISK BANNER -->
     <div class="banner">
       <h3>Important notice</h3>
       <div class="muted">
@@ -39,7 +38,8 @@
 
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/setup2.html">Setup</a>
         <a href="/dashboard.html">Dashboard</a>
         <a href="/account2.html">Account</a>
         <a href="#" onclick="logout()">Logout</a>
@@ -66,7 +66,6 @@
       <div id="msg" class="toast"></div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-inner">
         <span>© <span id="yr"></span> 676Trades</span>
@@ -80,6 +79,7 @@
         <a href="mailto:support@676trades.org">Support</a>
       </div>
     </footer>
+
   </div>
 
   <script>
