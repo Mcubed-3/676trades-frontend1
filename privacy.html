@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Privacy Policy</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .legal h1,.legal h2,.legal h3{margin:14px 0 8px}
+    .legal p,.legal li{line-height:1.6;opacity:.92}
+    .legal .muted{opacity:.75;font-size:13px}
+    .legal code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
+    .legal a{color:inherit}
+  </style>
+</head>
+<body>
+  <div class="container legal">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/billing.html">Billing</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/risk.html">Risk</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Privacy Policy</h1>
+      <div class="muted">Last updated: <span id="lastUpdated"></span></div>
+      <hr/>
+
+      <p>
+        This Privacy Policy explains how <b>676Trades</b> (“we”, “us”, “our”) collects, uses, and protects your information
+        when you use our website and services (the “Service”).
+      </p>
+
+      <h2>1) What we collect</h2>
+      <ul>
+        <li><b>Account info:</b> email address, password hash (we do not store your plaintext password).</li>
+        <li><b>API key:</b> a key that links your EA to your account (treat it like a password).</li>
+        <li><b>Billing status:</b> plan/subscription status and IDs from our payment processor (e.g., customer/subscription IDs).</li>
+        <li><b>EA connectivity:</b> heartbeat “last seen” time, and may include symbol/timeframe and basic connection metadata.</li>
+        <li><b>Trading configuration:</b> enabled/disabled state and settings you configure in the dashboard.</li>
+        <li><b>Logs:</b> basic security/diagnostic logs such as IP address and request metadata (for abuse prevention and debugging).</li>
+      </ul>
+
+      <h2>2) What we do NOT collect</h2>
+      <ul>
+        <li>We do not collect your broker password.</li>
+        <li>We do not have direct access to withdraw funds from your broker account.</li>
+        <li>We do not intentionally collect sensitive personal data.</li>
+      </ul>
+
+      <h2>3) How we use your information</h2>
+      <ul>
+        <li>To provide the Service, authenticate users, and deliver dashboard/EA functionality.</li>
+        <li>To enforce plan access (e.g., trial/subscription gating where applicable).</li>
+        <li>To detect fraud/abuse and protect the platform.</li>
+        <li>To provide support and troubleshoot issues.</li>
+      </ul>
+
+      <h2>4) Payments (third-party processors)</h2>
+      <p>
+        Payments are processed by third parties (for example, Stripe).
+        We do not store full card details. Payment processors handle your payment information under their own policies.
+      </p>
+
+      <h2>5) Cookies / local storage</h2>
+      <p>
+        The Service may use browser storage (e.g., localStorage/sessionStorage) to keep you logged in and to store session data.
+        You can clear your browser data to remove this.
+      </p>
+
+      <h2>6) Sharing your information</h2>
+      <p>We may share data only when necessary:</p>
+      <ul>
+        <li>With payment processors to manage billing/subscriptions.</li>
+        <li>With infrastructure providers used to host the Service.</li>
+        <li>When required by law or to protect our rights and users.</li>
+      </ul>
+
+      <h2>7) Data retention</h2>
+      <p>
+        We retain account and service data as long as needed to operate the Service, comply with obligations, resolve disputes,
+        and enforce agreements. You may request deletion where applicable, subject to legal requirements.
+      </p>
+
+      <h2>8) Security</h2>
+      <p>
+        We use reasonable technical and organizational measures to protect your data.
+        However, no system is 100% secure. Keep your API key private and rotate it if compromised.
+      </p>
+
+      <h2>9) International users</h2>
+      <p>
+        You may access the Service from different countries. Your data may be processed in the regions where our providers operate.
+        By using the Service, you consent to this processing where permitted by law.
+      </p>
+
+      <h2>10) Contact</h2>
+      <p>
+        If you have questions or requests (access, correction, deletion), contact:
+        <code>support@676trades.org</code>
+      </p>
+
+      <hr/>
+      <div class="muted">
+        Also read: <a href="/terms.html">Terms of Service</a> • <a href="/risk.html">Risk Disclosure</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("lastUpdated").textContent = new Date().toISOString().slice(0,10);
+  </script>
+</body>
+</html>

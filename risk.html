@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Risk Disclosure</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .legal h1,.legal h2,.legal h3{margin:14px 0 8px}
+    .legal p,.legal li{line-height:1.6;opacity:.92}
+    .legal .muted{opacity:.75;font-size:13px}
+    .legal a{color:inherit}
+    .callout{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+  </style>
+</head>
+<body>
+  <div class="container legal">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/billing.html">Billing</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Risk Disclosure</h1>
+      <div class="muted">Last updated: <span id="lastUpdated"></span></div>
+      <hr/>
+
+      <div class="callout">
+        <b>Trading risk warning:</b>
+        Trading (including forex, CFDs, metals such as XAUUSD, crypto, and leveraged products) involves substantial risk
+        and may not be suitable for all investors. You can lose some or all of your capital.
+      </div>
+
+      <h2>1) No guarantees</h2>
+      <p>
+        676Trades does not guarantee profits or performance. Any examples, backtests, signals, settings, or results shown
+        are not guarantees of future results.
+      </p>
+
+      <h2>2) Not financial advice</h2>
+      <p>
+        The Service is a tool for automation and configuration. Nothing on the site should be considered investment advice,
+        financial advice, legal advice, or tax advice. You are solely responsible for your trading decisions.
+      </p>
+
+      <h2>3) Market and execution risks</h2>
+      <ul>
+        <li><b>Volatility:</b> Prices can move quickly and unpredictably.</li>
+        <li><b>Slippage:</b> Your broker may fill orders at a different price than expected.</li>
+        <li><b>Spreads/fees:</b> Costs can widen during news events or low liquidity.</li>
+        <li><b>Leverage:</b> Leverage magnifies both gains and losses.</li>
+      </ul>
+
+      <h2>4) Technical risks</h2>
+      <ul>
+        <li>Internet outages, VPS downtime, MetaTrader issues, broker outages, or API failures may occur.</li>
+        <li>Settings may not apply instantly; the EA typically updates on its next poll/heartbeat.</li>
+        <li>Unexpected software bugs can occur; always monitor your account.</li>
+      </ul>
+
+      <h2>5) User responsibility</h2>
+      <p>
+        You are responsible for:
+      </p>
+      <ul>
+        <li>Choosing your broker and ensuring your account is suitable.</li>
+        <li>Understanding the strategy settings and risks.</li>
+        <li>Monitoring performance and disabling trading if needed.</li>
+        <li>Complying with your local regulations and broker terms.</li>
+      </ul>
+
+      <h2>6) Contact</h2>
+      <p>
+        Questions? Contact <b>676Trades</b> at <code>support@676trades.org</code>.
+      </p>
+
+      <hr/>
+      <div class="muted">
+        Also read: <a href="/terms.html">Terms of Service</a> • <a href="/privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("lastUpdated").textContent = new Date().toISOString().slice(0,10);
+  </script>
+</body>
+</html>

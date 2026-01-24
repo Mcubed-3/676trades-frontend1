@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>676Trades - Terms of Service</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .legal h1,.legal h2,.legal h3{margin:14px 0 8px}
+    .legal p,.legal li{line-height:1.6;opacity:.92}
+    .legal .muted{opacity:.75;font-size:13px}
+    .legal code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
+    .legal a{color:inherit}
+  </style>
+</head>
+<body>
+  <div class="container legal">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/billing.html">Billing</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/risk.html">Risk</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Terms of Service</h1>
+      <div class="muted">Last updated: <span id="lastUpdated"></span></div>
+      <hr/>
+
+      <p>
+        These Terms of Service (“Terms”) govern your use of the 676Trades website, dashboard, and related services
+        (the “Service”) operated by <b>676Trades</b> (“we”, “us”, “our”).
+        By creating an account or using the Service, you agree to these Terms.
+      </p>
+
+      <h2>1) Important risk notice (read this)</h2>
+      <p>
+        Trading involves risk. You can lose some or all of the money you deposit with your broker.
+        The Service does <b>not</b> guarantee profits, performance, or results. Past performance is not indicative of future results.
+      </p>
+      <p>
+        <b>Not financial advice:</b> The Service is provided for informational/automation tooling purposes only.
+        We are not providing investment, legal, or tax advice. You are responsible for your decisions and outcomes.
+      </p>
+
+      <h2>2) Eligibility</h2>
+      <p>
+        You must be legally allowed to use this Service in your location and to open/operate a trading account with your broker.
+        You are responsible for ensuring compliance with your local laws and broker rules.
+      </p>
+
+      <h2>3) Accounts and security</h2>
+      <ul>
+        <li>You are responsible for maintaining the confidentiality of your login and any API key(s).</li>
+        <li>Do not share your API key publicly. If you suspect exposure, rotate it immediately.</li>
+        <li>You are responsible for all activity that occurs under your account.</li>
+      </ul>
+
+      <h2>4) How the Service works (summary)</h2>
+      <p>
+        The Service provides a dashboard that can control settings for a MetaTrader 5 Expert Advisor (“EA”) via an API key.
+        Your EA may poll our backend for configuration and may send heartbeat/status information.
+      </p>
+
+      <h2>5) Subscriptions, trials, billing</h2>
+      <ul>
+        <li>If you choose a free trial, it will last the number of days shown at checkout (for example, 5 days).</li>
+        <li>After a trial ends, you may be charged according to the plan you selected unless you cancel before renewal.</li>
+        <li>Billing is handled by a third-party payment processor (e.g., Stripe). You agree to their terms as well.</li>
+        <li>If payment is required and your subscription is not active, we may disable trading controls until payment resumes.</li>
+      </ul>
+
+      <h3>Refunds</h3>
+      <p>
+        Unless required by law, subscription fees are generally non-refundable once a billing period has started.
+        If you believe an error occurred, contact us at <code>support@676trades.org</code>.
+      </p>
+
+      <h2>6) Acceptable use</h2>
+      <p>You agree not to:</p>
+      <ul>
+        <li>Use the Service for unlawful purposes or to violate broker/platform terms.</li>
+        <li>Attempt to bypass security, access other users’ data, or disrupt the Service.</li>
+        <li>Reverse engineer, abuse, or overload the Service.</li>
+      </ul>
+
+      <h2>7) Service availability</h2>
+      <p>
+        We try to keep the Service available, but we do not guarantee uninterrupted operation.
+        Outages, maintenance, broker issues, network problems, or third-party failures can occur.
+      </p>
+
+      <h2>8) Third-party services</h2>
+      <p>
+        The Service may integrate with third parties (e.g., Stripe, your broker, MetaTrader).
+        We are not responsible for third-party outages, pricing, policy changes, delays, broker execution, or trading conditions.
+      </p>
+
+      <h2>9) Limitation of liability</h2>
+      <p>
+        To the maximum extent permitted by law, 676Trades will not be liable for any losses, damages, or claims arising from:
+        trading outcomes, lost profits, missed opportunities, downtime, delays, or third-party service failures.
+      </p>
+
+      <h2>10) Termination</h2>
+      <p>
+        You may stop using the Service at any time.
+        We may suspend or terminate access if we reasonably believe you violated these Terms or used the Service abusively.
+      </p>
+
+      <h2>11) Changes to these Terms</h2>
+      <p>
+        We may update these Terms from time to time. If changes are material, we will update the “Last updated” date.
+        Your continued use of the Service after changes means you accept the updated Terms.
+      </p>
+
+      <h2>12) Contact</h2>
+      <p>
+        For questions, contact: <code>support@676trades.org</code>
+      </p>
+
+      <hr/>
+      <div class="muted">
+        Also read: <a href="/privacy.html">Privacy Policy</a> • <a href="/risk.html">Risk Disclosure</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-fill date at build-time feel (edit if you want a fixed date)
+    document.getElementById("lastUpdated").textContent = new Date().toISOString().slice(0,10);
+  </script>
+</body>
+</html>
