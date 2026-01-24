@@ -18,14 +18,42 @@
     .clickrow{cursor:pointer}
     .clickrow:hover{background:rgba(255,255,255,.03)}
     .muted{opacity:.75}
-    input,button{max-width:100%}
+    input,button,select{max-width:100%}
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media(max-width:900px){.actions{grid-template-columns:1fr}}
+    .box{
+      padding:12px;
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;
+      background:#0b1528;
+    }
+    .box h3{margin:0 0 8px 0;font-size:14px}
+    .smallnote{font-size:12px;opacity:.8;line-height:1.35}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap}
+    .dangerOutline{
+      background:#0b1528!important;
+      border:1px solid rgba(255,79,109,0.35)!important;
+      color:#ff9aae!important;
+    }
+    .okOutline{
+      background:#0b1528!important;
+      border:1px solid rgba(34,197,94,0.35)!important;
+      color:#8bffbf!important;
+    }
+    .miniToast{margin-top:8px;font-size:13px;opacity:.85}
+    .hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:14px 0;}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="nav">
       <div><b>676Trades</b> <span class="muted">Admin</span></div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:12px;align-items:center;">
         <a href="/setup2.html">Setup</a>
         <a href="/dashboard.html">Dashboard</a>
         <a href="#" onclick="logoutUser()">Logout user</a>
@@ -34,7 +62,7 @@
 
     <div class="card">
       <h1>Admin Console</h1>
-      <div class="small">View users + EA connectivity (heartbeat) + recent trades.</div>
+      <div class="small">View users + EA connectivity (heartbeat) + recent trades + admin actions.</div>
       <hr/>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -68,10 +96,118 @@
         </div>
       </div>
 
-      <!-- DETAILS -->
+      <!-- DETAILS + ACTIONS -->
       <div class="card">
         <h2 style="margin-top:0;">User details</h2>
         <div id="details" class="small muted">Select a user.</div>
+
+        <div id="actionsWrap" style="display:none;margin-top:14px;">
+          <div class="hr"></div>
+          <h2 style="margin:0 0 8px 0;">Admin Actions</h2>
+
+          <div class="actions">
+            <!-- FORCE ENABLE/DISABLE -->
+            <div class="box">
+              <h3>Force Algo Enable / Disable</h3>
+              <div class="smallnote">This flips <span class="mono">enabled</span> immediately for the selected user.</div>
+              <div class="btnrow" style="margin-top:10px;">
+                <button id="forceEnableBtn" class="okOutline">Force Enable</button>
+                <button id="forceDisableBtn" class="dangerOutline">Force Disable</button>
+              </div>
+              <div id="actMsg1" class="miniToast"></div>
+            </div>
+
+            <!-- FORCE LOGOUT -->
+            <div class="box">
+              <h3>Force Logout (Invalidate Sessions)</h3>
+              <div class="smallnote">Increments <span class="mono">token_version</span>. User must login again.</div>
+              <div class="btnrow" style="margin-top:10px;">
+                <button id="forceLogoutBtn" class="secondary">Force Logout</button>
+              </div>
+              <div id="actMsg2" class="miniToast"></div>
+            </div>
+
+            <!-- ROTATE API KEY -->
+            <div class="box">
+              <h3>Rotate User API Key</h3>
+              <div class="smallnote">Old key stops working in MT5 immediately. User must paste the new key into EA.</div>
+              <div class="btnrow" style="margin-top:10px;">
+                <button id="rotateKeyBtn" class="secondary">Rotate API Key</button>
+                <button id="copyNewKeyBtn" class="secondary" style="display:none;">Copy New Key</button>
+              </div>
+              <div id="actMsg3" class="miniToast"></div>
+            </div>
+
+            <!-- OVERRIDE PLAN/SUB -->
+            <div class="box">
+              <h3>Override Plan / Subscription</h3>
+              <div class="smallnote">For manual testing/support. If status != active, user is forced disabled.</div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                <div>
+                  <label style="margin:0 0 6px;display:block;color:rgba(255,255,255,.75);font-size:12px;">Plan</label>
+                  <select id="planSel">
+                    <option value="free">free</option>
+                    <option value="pro">pro</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="margin:0 0 6px;display:block;color:rgba(255,255,255,.75);font-size:12px;">Subscription status</label>
+                  <select id="subSel">
+                    <option value="none">none</option>
+                    <option value="active">active</option>
+                    <option value="past_due">past_due</option>
+                    <option value="canceled">canceled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="btnrow" style="margin-top:10px;">
+                <button id="saveBillingBtn">Save Billing Override</button>
+              </div>
+              <div id="actMsg4" class="miniToast"></div>
+            </div>
+
+            <!-- OVERRIDE SETTINGS -->
+            <div class="box">
+              <h3>Override Pairs / Lot</h3>
+              <div class="smallnote">Overrides settings immediately (use comma-separated pairs).</div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                <div>
+                  <label style="margin:0 0 6px;display:block;color:rgba(255,255,255,.75);font-size:12px;">Pairs CSV</label>
+                  <input id="pairsInput" placeholder="XAUUSD,EURUSD,GBPUSD"/>
+                </div>
+                <div>
+                  <label style="margin:0 0 6px;display:block;color:rgba(255,255,255,.75);font-size:12px;">Lot size</label>
+                  <input id="lotInput" type="number" step="0.01" placeholder="0.01"/>
+                </div>
+              </div>
+
+              <div class="btnrow" style="margin-top:10px;">
+                <button id="saveSettingsBtn">Save Settings Override</button>
+              </div>
+              <div id="actMsg5" class="miniToast"></div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <!-- OPTIONAL placeholders -->
+          <div class="box">
+            <h3>Charts (placeholder)</h3>
+            <div class="smallnote">
+              Later: add endpoints for daily signups / active users / trades count, then render charts here.
+            </div>
+          </div>
+
+          <div class="box" style="margin-top:12px;">
+            <h3>Audit Logs (placeholder)</h3>
+            <div class="smallnote">
+              Later: store “who did what, when” for admin actions. (Not required for launch.)
+            </div>
+          </div>
+        </div>
 
         <div style="margin-top:14px;">
           <h3 style="margin:10px 0;">Recent trades</h3>
@@ -79,39 +215,23 @@
         </div>
       </div>
     </div>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        <span>© <span id="yr"></span> 676Trades</span>
-        <span class="dot">·</span>
-        <a href="/terms.html">Terms</a>
-        <span class="dot">·</span>
-        <a href="/privacy.html">Privacy</a>
-        <span class="dot">·</span>
-        <a href="/risk.html">Risk Disclosure</a>
-        <span class="dot">·</span>
-        <a href="mailto:support@676trades.org">Support</a>
-      </div>
-    </footer>
-
   </div>
-
-  <script>
-    (function(){
-      var el = document.getElementById("yr");
-      if(el) el.textContent = new Date().getFullYear();
-    })();
-  </script>
 
   <script src="app.js"></script>
   <script>
+    // Admin token stored in sessionStorage (safer than localStorage)
     function getAdminToken(){ return sessionStorage.getItem("adminToken") || ""; }
     function setAdminToken(t){ sessionStorage.setItem("adminToken", t); }
 
     function logoutUser(){
-      localStorage.removeItem("apiKey");
+      // logs out the CURRENT website user session (not admin token)
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("api_key");
       window.location.href="/login.html";
     }
+
+    // IMPORTANT: use your backend domain constant
+    const BACKEND = "https://api.676trades.org";
 
     async function adminFetch(path, method="GET", body=null){
       const token = getAdminToken();
@@ -139,6 +259,9 @@
       if(!dt) return "—";
       try{ return new Date(dt).toLocaleString(); }catch(e){ return dt; }
     }
+
+    let selectedUserId = null;
+    let lastRotatedKey = null;
 
     async function loadUsers(){
       const msg = document.getElementById("msg");
@@ -182,10 +305,17 @@
     }
 
     async function loadUser(id){
+      selectedUserId = id;
+      lastRotatedKey = null;
+      document.getElementById("copyNewKeyBtn").style.display = "none";
+
       const details = document.getElementById("details");
       const trades = document.getElementById("trades");
+      const actionsWrap = document.getElementById("actionsWrap");
+
       details.textContent = "Loading user...";
       trades.textContent = "Loading trades...";
+      actionsWrap.style.display = "none";
 
       const data = await adminFetch(`/admin/user/${id}/activity`);
       const u = data.user;
@@ -209,31 +339,136 @@
         <div><b>Last IP:</b> <span class="mono">${u.last_seen_ip || "—"}</span></div>
       `;
 
+      // Prefill action inputs
+      document.getElementById("planSel").value = (u.plan || "free");
+      document.getElementById("subSel").value = (u.subscription_status || "none");
+      document.getElementById("pairsInput").value = (u.pairs || "");
+      document.getElementById("lotInput").value = (u.lot_size ?? "");
+
+      // show actions panel
+      actionsWrap.style.display = "block";
+
       if(!data.trades || data.trades.length === 0){
         trades.textContent = "No trades posted yet.";
-        return;
+      } else {
+        trades.innerHTML = data.trades.slice(0, 12).map(t => `
+          <div style="padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:10px;">
+            <div><b>${t.symbol}</b> <span class="mono">${t.side}</span> | vol <span class="mono">${t.volume}</span></div>
+            <div class="muted">Opened: ${fmt(t.opened_at)}</div>
+            <div class="mono muted">entry ${t.entry ?? "—"} | sl ${t.sl ?? "—"} | tp ${t.tp ?? "—"}</div>
+            <div>profit: <span class="mono">${t.profit ?? "—"}</span></div>
+          </div>
+        `).join("");
       }
-
-      trades.innerHTML = data.trades.slice(0, 12).map(t => `
-        <div style="padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:10px;">
-          <div><b>${t.symbol}</b> <span class="mono">${t.side}</span> | vol <span class="mono">${t.volume}</span></div>
-          <div class="muted">Opened: ${fmt(t.opened_at)}</div>
-          <div class="mono muted">entry ${t.entry ?? "—"} | sl ${t.sl ?? "—"} | tp ${t.tp ?? "—"}</div>
-          <div>profit: <span class="mono">${t.profit ?? "—"}</span></div>
-        </div>
-      `).join("");
     }
 
+    function requireSelected(){
+      if(!selectedUserId) throw new Error("Select a user first.");
+      return selectedUserId;
+    }
+
+    function setActionMsg(id, text){ document.getElementById(id).textContent = text; }
+
+    // --- ACTION BUTTONS ---
+    document.getElementById("forceEnableBtn").onclick = async ()=>{
+      try{
+        const id = requireSelected();
+        setActionMsg("actMsg1","Working...");
+        await adminFetch(`/admin/user/${id}/force-enabled`,"POST",{ enabled:true });
+        setActionMsg("actMsg1","Enabled set to TRUE.");
+        await loadUser(id);
+        await loadUsers();
+      }catch(e){ setActionMsg("actMsg1","Error: " + e.message); }
+    };
+
+    document.getElementById("forceDisableBtn").onclick = async ()=>{
+      try{
+        const id = requireSelected();
+        setActionMsg("actMsg1","Working...");
+        await adminFetch(`/admin/user/${id}/force-enabled`,"POST",{ enabled:false });
+        setActionMsg("actMsg1","Enabled set to FALSE.");
+        await loadUser(id);
+        await loadUsers();
+      }catch(e){ setActionMsg("actMsg1","Error: " + e.message); }
+    };
+
+    document.getElementById("forceLogoutBtn").onclick = async ()=>{
+      try{
+        const id = requireSelected();
+        setActionMsg("actMsg2","Working...");
+        await adminFetch(`/admin/user/${id}/force-logout`,"POST",{});
+        setActionMsg("actMsg2","User sessions invalidated (force logout).");
+        await loadUser(id);
+      }catch(e){ setActionMsg("actMsg2","Error: " + e.message); }
+    };
+
+    document.getElementById("rotateKeyBtn").onclick = async ()=>{
+      try{
+        const id = requireSelected();
+        setActionMsg("actMsg3","Rotating...");
+        const r = await adminFetch(`/admin/user/${id}/rotate-api-key`,"POST",{});
+        lastRotatedKey = r.api_key || "";
+        setActionMsg("actMsg3","Rotated. New key generated.");
+        if(lastRotatedKey) document.getElementById("copyNewKeyBtn").style.display = "inline-block";
+        await loadUser(id);
+      }catch(e){ setActionMsg("actMsg3","Error: " + e.message); }
+    };
+
+    document.getElementById("copyNewKeyBtn").onclick = async ()=>{
+      try{
+        if(!lastRotatedKey) throw new Error("No new key yet. Click Rotate API Key first.");
+        await navigator.clipboard.writeText(lastRotatedKey);
+        setActionMsg("actMsg3","Copied new key to clipboard.");
+      }catch(e){ setActionMsg("actMsg3","Error: " + e.message); }
+    };
+
+    document.getElementById("saveBillingBtn").onclick = async ()=>{
+      try{
+        const id = requireSelected();
+        setActionMsg("actMsg4","Saving...");
+        const plan = document.getElementById("planSel").value;
+        const subscription_status = document.getElementById("subSel").value;
+        await adminFetch(`/admin/user/${id}/override-billing`,"POST",{ plan, subscription_status });
+        setActionMsg("actMsg4","Billing override saved.");
+        await loadUser(id);
+        await loadUsers();
+      }catch(e){ setActionMsg("actMsg4","Error: " + e.message); }
+    };
+
+    document.getElementById("saveSettingsBtn").onclick = async ()=>{
+      try{
+        const id = requireSelected();
+        setActionMsg("actMsg5","Saving...");
+        const pairs = document.getElementById("pairsInput").value.trim();
+        const lot_size = Number(document.getElementById("lotInput").value);
+        const payload = {};
+        if(pairs) payload.pairs = pairs;
+        if(!Number.isNaN(lot_size) && lot_size > 0) payload.lot_size = lot_size;
+
+        await adminFetch(`/admin/user/${id}/override-settings`,"POST", payload);
+        setActionMsg("actMsg5","Settings override saved.");
+        await loadUser(id);
+        await loadUsers();
+      }catch(e){ setActionMsg("actMsg5","Error: " + e.message); }
+    };
+
+    // --- TOKEN UI ---
     document.getElementById("setAdminTokenBtn").onclick = () => {
       const t = prompt("Paste ADMIN_TOKEN (stored only in this browser session):", getAdminToken());
       if(t) setAdminToken(t.trim());
     };
 
-    document.getElementById("refreshBtn").onclick = loadUsers;
-    document.getElementById("q").addEventListener("keydown", (e)=>{
-      if(e.key === "Enter") loadUsers();
+    document.getElementById("refreshBtn").onclick = () => loadUsers().catch(e => {
+      document.getElementById("msg").textContent = "Error: " + e.message;
     });
 
+    document.getElementById("q").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter"){
+        loadUsers().catch(err => document.getElementById("msg").textContent = "Error: " + err.message);
+      }
+    });
+
+    // start
     loadUsers().catch(e => document.getElementById("msg").textContent = "Error: " + e.message);
   </script>
 </body>
