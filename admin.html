@@ -18,7 +18,9 @@
     .clickrow{cursor:pointer}
     .clickrow:hover{background:rgba(255,255,255,.03)}
     .muted{opacity:.75}
-    input,button{max-width:100%}
+    input,button,select{max-width:100%}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:900px){.row2{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -78,6 +80,52 @@
           <button id="rotateKeyBtn" class="secondary">Rotate API Key</button>
         </div>
 
+        <!-- Billing override -->
+        <div id="billingBox" style="display:none;margin-top:14px;">
+          <hr/>
+          <h3 style="margin:10px 0;">Billing override</h3>
+          <div class="small muted">Use this to grant pro manually, set status, or extend trial.</div>
+
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label>Plan</label>
+              <select id="ovPlan">
+                <option value="">(no change)</option>
+                <option value="free">free</option>
+                <option value="pro">pro</option>
+              </select>
+            </div>
+            <div>
+              <label>Subscription status</label>
+              <select id="ovSub">
+                <option value="">(no change)</option>
+                <option value="none">none</option>
+                <option value="active">active</option>
+                <option value="past_due">past_due</option>
+                <option value="canceled">canceled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label>Extend trial by days (0 clears trial)</label>
+              <input id="ovTrialDays" type="number" placeholder="e.g. 7"/>
+            </div>
+            <div>
+              <label>Or set trial until (ISO)</label>
+              <input id="ovTrialUntil" placeholder="2026-02-01T00:00:00Z"/>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button id="applyBillingBtn">Apply override</button>
+            <button id="clearInputsBtn" class="secondary">Clear inputs</button>
+          </div>
+
+          <div id="billMsg" class="small muted" style="margin-top:8px;"></div>
+        </div>
+
         <div style="margin-top:14px;">
           <h3 style="margin:10px 0;">Recent trades</h3>
           <div id="trades" class="small muted">—</div>
@@ -88,7 +136,6 @@
 
   <script src="app.js"></script>
   <script>
-    // Keep admin token separate from user apiKey
     function getAdminToken(){ return sessionStorage.getItem("adminToken") || ""; }
     function setAdminToken(t){ sessionStorage.setItem("adminToken", t); }
 
@@ -165,24 +212,36 @@
       msg.textContent = `Loaded ${data.items.length} user(s).`;
     }
 
+    let currentUserId = null;
+    let currentUserEmail = "";
+
     async function loadUser(id){
+      currentUserId = id;
       const details = document.getElementById("details");
       const trades = document.getElementById("trades");
       const actions = document.getElementById("actions");
+      const billingBox = document.getElementById("billingBox");
+      const billMsg = document.getElementById("billMsg");
+
       details.textContent = "Loading user...";
       trades.textContent = "Loading trades...";
       actions.style.display = "none";
+      billingBox.style.display = "none";
+      billMsg.textContent = "";
 
       const data = await adminFetch(`/admin/user/${id}/activity`);
       const u = data.user;
+      currentUserEmail = u.email;
 
       actions.style.display = "flex";
+      billingBox.style.display = "block";
 
       details.innerHTML = `
         <div><b>ID:</b> <span class="mono">${u.id}</span></div>
         <div><b>Email:</b> ${u.email}</div>
         <div><b>Plan:</b> <span class="mono">${u.plan}</span></div>
         <div><b>Subscription:</b> <span class="mono">${u.subscription_status}</span></div>
+        <div><b>Trial ends:</b> <span class="mono">${u.trial_ends_at ? fmt(u.trial_ends_at) : "—"}</span></div>
         <div><b>Enabled:</b> <span class="mono">${u.enabled}</span></div>
         <div><b>Pairs:</b> <span class="mono">${u.pairs}</span></div>
         <div><b>Lot:</b> <span class="mono">${u.lot_size}</span></div>
@@ -197,38 +256,67 @@
         <div><b>Last IP:</b> <span class="mono">${u.last_seen_ip || "—"}</span></div>
       `;
 
-      // Force enable/disable
       document.getElementById("disableBtn").onclick = async () => {
         if(!confirm(`Force DISABLE EA for ${u.email}?`)) return;
         await adminFetch(`/admin/user/${u.id}/force-disable`, "POST", {});
-        await loadUsers();
-        await loadUser(u.id);
+        await loadUsers(); await loadUser(u.id);
         document.getElementById("msg").textContent = "EA disabled.";
       };
 
       document.getElementById("enableBtn").onclick = async () => {
         if(!confirm(`Force ENABLE EA for ${u.email}? (Must be paid/trial active)`)) return;
         await adminFetch(`/admin/user/${u.id}/force-enable`, "POST", {});
-        await loadUsers();
-        await loadUser(u.id);
+        await loadUsers(); await loadUser(u.id);
         document.getElementById("msg").textContent = "EA enabled.";
       };
 
-      // ✅ Rotate user's API key (and disable EA for safety)
       document.getElementById("rotateKeyBtn").onclick = async () => {
         if(!confirm(`Rotate API key for ${u.email}?\n\nThis will DISABLE the EA until the user updates their key in MT5.`)) return;
 
         const r = await adminFetch(`/admin/user/${u.id}/rotate-key`, "POST", {});
-        await loadUsers();
-        await loadUser(u.id);
+        await loadUsers(); await loadUser(u.id);
 
         try{
           await navigator.clipboard.writeText(r.api_key);
-          document.getElementById("msg").textContent = "New API key generated + copied to clipboard. EA disabled.";
+          document.getElementById("msg").textContent = "New API key generated + copied. EA disabled.";
         }catch(e){
-          document.getElementById("msg").textContent = "New API key generated. (Clipboard copy blocked by browser)";
           alert("New API Key:\n\n" + r.api_key);
+          document.getElementById("msg").textContent = "New API key generated. (Clipboard blocked)";
         }
+      };
+
+      // Apply billing override
+      document.getElementById("applyBillingBtn").onclick = async () => {
+        const plan = document.getElementById("ovPlan").value.trim();
+        const subscription_status = document.getElementById("ovSub").value.trim();
+        const trial_days_raw = document.getElementById("ovTrialDays").value.trim();
+        const trial_until = document.getElementById("ovTrialUntil").value.trim();
+
+        const payload = {};
+        if(plan) payload.plan = plan;
+        if(subscription_status) payload.subscription_status = subscription_status;
+        if(trial_days_raw !== "") payload.trial_days = Number(trial_days_raw);
+        if(trial_until) payload.trial_until = trial_until;
+
+        if(Object.keys(payload).length === 0){
+          billMsg.textContent = "Nothing to apply. Choose at least one field.";
+          return;
+        }
+
+        billMsg.textContent = "Applying...";
+        const r = await adminFetch(`/admin/user/${u.id}/set-billing`, "POST", payload);
+        billMsg.textContent = `Updated: plan=${r.plan}, sub=${r.subscription_status}, trial=${r.trial_ends_at || "—"}, enabled=${r.enabled}`;
+
+        await loadUsers();
+        await loadUser(u.id);
+      };
+
+      document.getElementById("clearInputsBtn").onclick = () => {
+        document.getElementById("ovPlan").value = "";
+        document.getElementById("ovSub").value = "";
+        document.getElementById("ovTrialDays").value = "";
+        document.getElementById("ovTrialUntil").value = "";
+        billMsg.textContent = "";
       };
 
       // Trades
