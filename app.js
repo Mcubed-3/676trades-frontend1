@@ -1,28 +1,43 @@
+// app.js
+// Frontend helper for 676Trades
+// Uses JWT (Authorization: Bearer <token>) for website calls
+// Stores apiKey separately for MT5 EA copy/paste
+
 const BACKEND = "https://api.676trades.org";
 
-function getToken(){ return localStorage.getItem("apiKey") || ""; }
-function setToken(t){ localStorage.setItem("apiKey", t); }
+// ---------- Token storage ----------
+function setAccessToken(t){ localStorage.setItem("accessToken", t); }
+function getAccessToken(){ return localStorage.getItem("accessToken") || ""; }
 
-function getJwt(){ return localStorage.getItem("jwt") || ""; }
-function setJwt(t){ localStorage.setItem("jwt", t); }
+function setApiKey(k){ localStorage.setItem("apiKey", k); }
+function getApiKey(){ return localStorage.getItem("apiKey") || ""; }
 
+// Backward-compat (your pages already call getToken/setToken)
+function setToken(v){ setAccessToken(v); }
+function getToken(){ return getAccessToken(); }
+
+// ---------- Session helpers ----------
 function logout(){
-  localStorage.removeItem("apiKey");
-  localStorage.removeItem("jwt");
-  window.location.href="/login.html";
+  localStorage.removeItem("accessToken");
+  // Keep apiKey for convenience; uncomment to clear it too
+  // localStorage.removeItem("apiKey");
+  window.location.href = "/login.html";
 }
 
+function requireLogin(redirectTo="/login.html"){
+  if(!getAccessToken()){
+    window.location.href = redirectTo;
+    return false;
+  }
+  return true;
+}
+
+// ---------- API wrapper ----------
 async function api(path, method="GET", body=null){
   const headers = { "Content-Type":"application/json" };
 
-  const jwt = getJwt();
-  const apiKey = getToken();
-
-  if(jwt){
-    headers["Authorization"] = "Bearer " + jwt;
-  } else if(apiKey){
-    headers["X-API-Key"] = apiKey;
-  }
+  const token = getAccessToken();
+  if(token) headers["Authorization"] = "Bearer " + token;
 
   const res = await fetch(`${BACKEND}${path}`, {
     method,
