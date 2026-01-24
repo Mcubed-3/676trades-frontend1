@@ -75,6 +75,7 @@
         <div id="actions" style="margin-top:12px;display:none;gap:10px;flex-wrap:wrap;">
           <button id="enableBtn">Force Enable EA</button>
           <button id="disableBtn" class="danger">Force Disable EA</button>
+          <button id="rotateKeyBtn" class="secondary">Rotate API Key</button>
         </div>
 
         <div style="margin-top:14px;">
@@ -168,13 +169,14 @@
       const details = document.getElementById("details");
       const trades = document.getElementById("trades");
       const actions = document.getElementById("actions");
-
       details.textContent = "Loading user...";
       trades.textContent = "Loading trades...";
       actions.style.display = "none";
 
       const data = await adminFetch(`/admin/user/${id}/activity`);
       const u = data.user;
+
+      actions.style.display = "flex";
 
       details.innerHTML = `
         <div><b>ID:</b> <span class="mono">${u.id}</span></div>
@@ -195,33 +197,41 @@
         <div><b>Last IP:</b> <span class="mono">${u.last_seen_ip || "—"}</span></div>
       `;
 
-      actions.style.display = "flex";
-
+      // Force enable/disable
       document.getElementById("disableBtn").onclick = async () => {
-        if(!confirm(`Disable EA for ${u.email}?`)) return;
-        await adminFetch(`/admin/user/${u.id}/disable`, "POST", {});
+        if(!confirm(`Force DISABLE EA for ${u.email}?`)) return;
+        await adminFetch(`/admin/user/${u.id}/force-disable`, "POST", {});
         await loadUsers();
         await loadUser(u.id);
         document.getElementById("msg").textContent = "EA disabled.";
       };
 
       document.getElementById("enableBtn").onclick = async () => {
-        try{
-          await adminFetch(`/admin/user/${u.id}/enable`, "POST", {});
-        }catch(e){
-          if(String(e.message || "").includes("402")){
-            const force = confirm("User is not paid/trial. Force enable anyway?");
-            if(!force) throw e;
-            await adminFetch(`/admin/user/${u.id}/enable`, "POST", { force:true });
-          }else{
-            throw e;
-          }
-        }
+        if(!confirm(`Force ENABLE EA for ${u.email}? (Must be paid/trial active)`)) return;
+        await adminFetch(`/admin/user/${u.id}/force-enable`, "POST", {});
         await loadUsers();
         await loadUser(u.id);
         document.getElementById("msg").textContent = "EA enabled.";
       };
 
+      // ✅ Rotate user's API key (and disable EA for safety)
+      document.getElementById("rotateKeyBtn").onclick = async () => {
+        if(!confirm(`Rotate API key for ${u.email}?\n\nThis will DISABLE the EA until the user updates their key in MT5.`)) return;
+
+        const r = await adminFetch(`/admin/user/${u.id}/rotate-key`, "POST", {});
+        await loadUsers();
+        await loadUser(u.id);
+
+        try{
+          await navigator.clipboard.writeText(r.api_key);
+          document.getElementById("msg").textContent = "New API key generated + copied to clipboard. EA disabled.";
+        }catch(e){
+          document.getElementById("msg").textContent = "New API key generated. (Clipboard copy blocked by browser)";
+          alert("New API Key:\n\n" + r.api_key);
+        }
+      };
+
+      // Trades
       if(!data.trades || data.trades.length === 0){
         trades.textContent = "No trades posted yet.";
         return;
