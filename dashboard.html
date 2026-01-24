@@ -66,7 +66,8 @@
 
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/setup2.html">Setup</a>
         <a href="/account2.html">Account</a>
         <a href="/billing.html">Billing</a>
         <a href="#" onclick="logout()">Logout</a>
@@ -185,65 +186,33 @@
     <!-- MT5 ONBOARDING -->
     <div class="card">
       <h2>MT5 Setup (Plug & Play)</h2>
-      <div class="small">Follow these steps to connect your EA.</div>
+      <div class="small">Use the Setup guide for the full instructions.</div>
       <hr/>
-
-      <h3>Step 1 — Copy your API key</h3>
-      <button onclick="copyKey()">Copy API Key</button>
-
-      <h3 style="margin-top:18px;">Step 2 — Install the EA</h3>
-      <ol class="small">
-        <li>Open MT5</li>
-        <li>File → Open Data Folder</li>
-        <li>MQL5 → Experts</li>
-        <li>Copy EA file there</li>
-        <li>Restart MT5</li>
-      </ol>
-      <a href="#" class="secondary">Download EA (BinaryScalper.ex5)</a>
-
-      <h3 style="margin-top:18px;">Step 3 — Allow WebRequest</h3>
-      <ol class="small">
-        <li>MT5 → Tools → Options → Expert Advisors</li>
-        <li>Enable “Allow WebRequest for listed URLs”</li>
-        <li>Add:</li>
-      </ol>
-      <code>https://api.676trades.org</code>
-
-      <h3 style="margin-top:18px;">Step 4 — Attach EA</h3>
-      <ol class="small">
-        <li>Open chart (example: XAUUSD M5)</li>
-        <li>Drag EA onto chart</li>
-        <li>Paste API key into EA inputs</li>
-        <li>Enable Algo Trading</li>
-      </ol>
-
-      <h3 style="margin-top:18px;">Step 5 — Confirm connection</h3>
-      <div class="small">Once EA is running, your dashboard will show “EA Connected ✅”.</div>
-      <button class="secondary" onclick="refresh()">Refresh Status</button>
+      <button class="secondary" onclick="window.location.href='/setup2.html'">Open Setup Guide</button>
     </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>© <span id="yr"></span> 676Trades</span>
+        <span class="dot">·</span>
+        <a href="/terms.html">Terms</a>
+        <span class="dot">·</span>
+        <a href="/privacy.html">Privacy</a>
+        <span class="dot">·</span>
+        <a href="/risk.html">Risk Disclosure</a>
+        <span class="dot">·</span>
+        <a href="mailto:support@676trades.org">Support</a>
+      </div>
+    </footer>
+
   </div>
 
-  <footer class="footer">
-  <div class="footer-inner">
-    <span>© <span id="yr"></span> 676Trades</span>
-    <span class="dot">·</span>
-    <a href="/terms.html">Terms</a>
-    <span class="dot">·</span>
-    <a href="/privacy.html">Privacy</a>
-    <span class="dot">·</span>
-    <a href="/risk.html">Risk Disclosure</a>
-    <span class="dot">·</span>
-    <a href="mailto:support@676trades.org">Support</a>
-  </div>
-</footer>
-
-<script>
-  // footer year
-  (function(){ 
-    var el = document.getElementById("yr");
-    if(el) el.textContent = new Date().getFullYear();
-  })();
-</script>
+  <script>
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
 
   <script src="app.js"></script>
   <script>
@@ -338,7 +307,6 @@
     document.getElementById("refreshBtn").onclick = refresh;
 
     startBtn.onclick = async ()=>{
-      // UI gate
       if(!updateStartGate()){
         riskHint.style.display = "block";
         msg.textContent = "Please confirm the risk disclaimer first.";
@@ -399,10 +367,9 @@
 
     // init
     if(requireLogin()){
-      updateStartGate(); // sets Start Algo disabled until checked
+      updateStartGate();
       refresh();
     }
   </script>
 </body>
 </html>
-
