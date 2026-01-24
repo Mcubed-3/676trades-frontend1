@@ -14,7 +14,7 @@
       border:1px solid rgba(255,255,255,0.10);
       background: rgba(255,180,0,0.08);
       border-radius:14px;
-      padding:14px 14px;
+      padding:14px;
       margin-bottom:14px;
     }
     .banner h3{ margin:0 0 6px 0; font-size:16px; }
@@ -40,6 +40,40 @@
       pointer-events:none;
       filter: grayscale(20%);
     }
+
+    .hint{
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(34,197,94,0.08);
+      margin-top:10px;
+      font-size:13px;
+      color:rgba(255,255,255,0.92);
+    }
+    .hint b{color:#bfffe0;}
+
+    .label-row{display:flex;align-items:center;gap:8px;}
+    .info{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:18px;height:18px;border-radius:999px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.06);
+      color:rgba(255,255,255,0.85);
+      font-size:12px;cursor:help;position:relative;flex:0 0 auto;
+    }
+    .info .tip{
+      display:none;position:absolute;left:0;top:22px;width:260px;max-width:70vw;
+      z-index:30;padding:10px;border-radius:12px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:#071024;color:rgba(255,255,255,0.92);
+      font-size:12px;line-height:1.35;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .info:hover .tip{display:block;}
+    @media(max-width:720px){
+      .info:hover .tip{display:none;}
+      .info.open .tip{display:block;}
+    }
   </style>
 </head>
 <body>
@@ -50,7 +84,7 @@
       <h3>Risk disclaimer</h3>
       <div class="muted">
         Automated trading involves risk and can result in losses. 676Trades does not provide financial advice.
-        Use at your own risk. Past performance is not indicative of future results.
+        Use at your own risk.
       </div>
 
       <div class="rowline">
@@ -68,8 +102,8 @@
       <div><b>676Trades</b></div>
       <div style="display:flex;gap:12px;align-items:center;">
         <a href="/setup2.html">Setup</a>
-        <a href="/account2.html">Account</a>
         <a href="/billing.html">Billing</a>
+        <a href="/account2.html">Account</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
@@ -77,7 +111,7 @@
     <!-- STATUS CARD -->
     <div class="card">
       <h1>Dashboard</h1>
-      <div class="small">Controls your MT5 EA. Changes are picked up on the next EA poll.</div>
+      <div class="small">Beginner mode: choose pairs + lot size, save, then start the algo.</div>
       <hr/>
 
       <div class="kv">
@@ -98,16 +132,16 @@
       </div>
 
       <div id="msg" class="toast"></div>
-      <div class="smallmuted">EA becomes “Connected” when it posts heartbeat within the last 5 minutes.</div>
+      <div class="smallmuted">Tip: If EA shows Offline, open MT5 and follow the Setup page.</div>
     </div>
 
-    <!-- SETTINGS CARD -->
+    <!-- SETTINGS CARD (BEGINNER ONLY) -->
     <div class="card">
-      <h2>Trading Settings</h2>
+      <h2>Basic Settings</h2>
 
       <div class="hint">
         <b>Recommended for beginners:</b> Start with <b>XAUUSD</b> and <b>0.01</b> lot size.
-        Save settings, then start the algo once your EA shows Connected.
+        Keep it simple (1–2 pairs).
       </div>
 
       <div class="row">
@@ -121,9 +155,9 @@
               </span>
             </span>
           </div>
-          <input id="pairs" placeholder="XAUUSD,EURUSD" value="XAUUSD"/>
-          <div class="small" style="margin-top:6px;opacity:0.8;">
-            Keep it simple: start with 1–2 pairs.
+          <input id="pairs" placeholder="XAUUSD" value="XAUUSD"/>
+          <div class="small" style="opacity:0.85;margin-top:6px;">
+            Example: <b>XAUUSD</b> or <b>XAUUSD,EURUSD</b>
           </div>
         </div>
 
@@ -133,120 +167,11 @@
             <span class="info">i
               <span class="tip">
                 Trade volume per position. Smaller = lower risk.
-                Example: 0.01 is a common starting size.
+                0.01 is a common starting size.
               </span>
             </span>
           </div>
           <input id="lot" type="number" step="0.01" value="0.01"/>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <div class="label-row">
-            <label style="margin:10px 0 6px;">Stop Loss Mode</label>
-            <span class="info">i
-              <span class="tip">
-                Dynamic = EA calculates SL from price structure.
-                Fixed = uses your Fixed SL pips (advanced).
-              </span>
-            </span>
-          </div>
-          <select id="sl_mode">
-            <option value="dynamic">Dynamic (recommended)</option>
-            <option value="fixed">Fixed (advanced)</option>
-          </select>
-        </div>
-
-        <div>
-          <div class="label-row">
-            <label style="margin:10px 0 6px;">Take Profit Mode</label>
-            <span class="info">i
-              <span class="tip">
-                RR = targets a multiple of risk (simple + popular).
-                Fixed/Pattern are advanced options.
-              </span>
-            </span>
-          </div>
-          <select id="tp_mode">
-            <option value="rr">Risk / Reward (RR) (recommended)</option>
-            <option value="pattern_mult">Pattern multiplier (advanced)</option>
-            <option value="fixed">Fixed (advanced)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <div class="label-row">
-            <label style="margin:10px 0 6px;">RR (Risk/Reward)</label>
-            <span class="info">i
-              <span class="tip">
-                RR=1 means TP distance equals SL distance.
-                RR=2 targets double the SL distance.
-              </span>
-            </span>
-          </div>
-          <input id="rr" type="number" step="0.1" value="1.0"/>
-        </div>
-
-        <div>
-          <label> </label>
-          <div class="small" style="opacity:0.8;margin-top:12px;">
-            If you’re unsure, keep RR at <b>1.0</b>.
-          </div>
-        </div>
-      </div>
-
-      <!-- ADVANCED TOGGLE -->
-      <div id="advToggle" class="advanced-toggle" style="margin-top:12px;">
-        <div>
-          <b>Advanced settings</b>
-          <div class="muted">Optional. Most users can leave these alone.</div>
-        </div>
-        <div id="advArrow" class="muted">▼</div>
-      </div>
-
-      <div id="advBox" class="advanced-box">
-        <div class="row">
-          <div>
-            <label>Minimum pips (floor)</label>
-            <input id="min_pips" type="number" value="50"/>
-            <div class="small" style="opacity:.8;">Prevents very small SL/TP distances.</div>
-          </div>
-
-          <div>
-            <label>SL buffer pips</label>
-            <input id="sl_buffer_pips" type="number" value="5"/>
-            <div class="small" style="opacity:.8;">Small extra space to reduce stop-outs.</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Pattern TP Multiplier</label>
-            <input id="pattern_tp_mult" type="number" step="0.1" value="1.5"/>
-            <div class="small" style="opacity:.8;">Used only when TP Mode = Pattern multiplier.</div>
-          </div>
-
-          <div>
-            <label> </label>
-            <div class="small" style="opacity:.8;margin-top:12px;">
-              Only change these if you know exactly why.
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Fixed SL pips</label>
-            <input id="fixed_sl_pips" type="number" value="50"/>
-          </div>
-
-          <div>
-            <label>Fixed TP pips</label>
-            <input id="fixed_tp_pips" type="number" value="50"/>
-          </div>
         </div>
       </div>
 
@@ -256,6 +181,11 @@
       </div>
 
       <div id="msg2" class="toast"></div>
+
+      <hr/>
+      <div class="small">
+        Need help installing MT5 + EA? Go to <a href="/setup2.html">Setup</a>.
+      </div>
     </div>
 
     <footer class="footer">
@@ -299,24 +229,8 @@
       });
     })();
 
-    // Advanced settings toggle
-    (function(){
-      const t = document.getElementById("advToggle");
-      const box = document.getElementById("advBox");
-      const arrow = document.getElementById("advArrow");
-      if(t && box){
-        t.addEventListener("click", ()=>{
-          const open = box.classList.toggle("show");
-          if(arrow) arrow.textContent = open ? "▲" : "▼";
-        });
-      }
-    })();
-  </script>
-
-  <script>
     const msg = document.getElementById("msg");
     const msg2 = document.getElementById("msg2");
-
     const startBtn = document.getElementById("startBtn");
     const riskCheck = document.getElementById("riskCheck");
     const riskHint = document.getElementById("riskHint");
@@ -339,7 +253,6 @@
       }
       return ok;
     }
-
     riskCheck.addEventListener("change", updateStartGate);
 
     function pickPairs(s){
@@ -351,18 +264,6 @@
 
       document.getElementById("pairs").value = pairsVal;
       document.getElementById("lot").value = (s.lot_size ?? 0.01);
-
-      document.getElementById("sl_mode").value = (s.sl_mode || "dynamic");
-      document.getElementById("tp_mode").value = (s.tp_mode || "rr");
-
-      document.getElementById("min_pips").value = (s.min_pips ?? 50);
-      document.getElementById("sl_buffer_pips").value = (s.sl_buffer_pips ?? 5);
-
-      document.getElementById("rr").value = (s.rr ?? 1.0);
-      document.getElementById("pattern_tp_mult").value = (s.pattern_tp_mult ?? 1.5);
-
-      document.getElementById("fixed_sl_pips").value = (s.fixed_sl_pips ?? 50);
-      document.getElementById("fixed_tp_pips").value = (s.fixed_tp_pips ?? 50);
 
       const badge = document.getElementById("statusBadge");
       badge.textContent = s.enabled ? "ON" : "OFF";
@@ -404,7 +305,6 @@
         msg.textContent = "Please confirm the risk disclaimer first.";
         return;
       }
-
       msg.textContent = "Starting...";
       try{
         await api("/api/v1/toggle","POST",{ enabled:true });
@@ -421,7 +321,9 @@
         await api("/api/v1/toggle","POST",{ enabled:false });
         await refresh();
         msg.textContent = "Stopped.";
-      }catch(e){ msg.textContent = "Error: " + e.message; }
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
     };
 
     document.getElementById("saveBtn").onclick = async ()=>{
@@ -429,20 +331,8 @@
       try{
         await api("/api/v1/settings","POST",{
           pairs: document.getElementById("pairs").value.trim(),
-          lot_size: Number(document.getElementById("lot").value),
-
-          sl_mode: document.getElementById("sl_mode").value,
-          tp_mode: document.getElementById("tp_mode").value,
-
-          // advanced
-          min_pips: Number(document.getElementById("min_pips").value),
-          sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
-          rr: Number(document.getElementById("rr").value),
-          pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
-          fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
-          fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
+          lot_size: Number(document.getElementById("lot").value)
         });
-
         msg2.textContent = "Saved. EA will pick this up on next poll.";
         await refresh();
       }catch(e){
@@ -456,6 +346,7 @@
       msg2.textContent = "API key copied.";
     };
 
+    // init
     if(requireLogin()){
       updateStartGate();
       refresh();
