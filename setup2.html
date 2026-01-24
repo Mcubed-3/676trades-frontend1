@@ -40,12 +40,15 @@
     ul,ol{ margin:8px 0 0 18px; }
     li{ margin:6px 0; }
     .links a{ display:inline-block; margin-right:10px; }
+
+    .dlrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    .note{font-size:12px;opacity:.8;line-height:1.35;margin-top:8px;}
+    .warn{color:#ffb4b4;opacity:0.9;}
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- RISK / COMPLIANCE BANNER -->
     <div class="banner">
       <h3>Important notice</h3>
       <div class="muted">
@@ -57,8 +60,7 @@
 
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <a href="/setup2.html">Setup</a>
+      <div style="display:flex;gap:12px;align-items:center;">
         <a href="/dashboard.html">Dashboard</a>
         <a href="/billing.html">Billing</a>
         <a href="/account2.html">Account</a>
@@ -86,14 +88,14 @@
           <li>MetaTrader 5 installed</li>
           <li>A broker account that supports MT5</li>
           <li>Internet connection</li>
-          <li>Your 676Trades API key (from Dashboard → Copy API Key)</li>
+          <li>Your 676Trades API key (Dashboard → Copy API Key)</li>
         </ul>
       </div>
 
       <div class="step">
         <h3>Broker and platform links <span class="pill">External links</span></h3>
         <div class="small">
-          These are optional convenience links. 676Trades is not affiliated with any broker or platform listed below.
+          Optional convenience links. 676Trades is not affiliated with any broker or platform listed below.
           Always review broker terms, fees, and regional availability yourself.
         </div>
         <div class="links" style="margin-top:10px;">
@@ -101,96 +103,104 @@
           <a href="https://pepperstone.com" target="_blank" rel="noopener noreferrer">Pepperstone</a>
           <a href="https://deriv.com" target="_blank" rel="noopener noreferrer">Deriv</a>
         </div>
-        <div class="small" style="margin-top:10px;opacity:.85;">
+        <div class="note">
           <b>Note:</b> Pepperstone is commonly used by UK-based traders. Deriv is commonly used by users outside the UK.
           Availability may vary by region.
         </div>
       </div>
 
       <div class="step">
-        <h3>Step 1 — Install MetaTrader 5</h3>
+        <h3>Step 1 — Download the EA</h3>
+        <div class="small">
+          Download the EA file and keep it somewhere easy to find (for example: Downloads folder).
+        </div>
+
+        <div class="dlrow">
+          <!-- ✅ Recommended: host the EA in your frontend repo under /downloads/ -->
+          <a id="eaLink" href="/downloads/BinaryScalper.ex5" class="secondary" download>Download EA (BinaryScalper.ex5)</a>
+
+          <!-- Optional: if you later serve from backend, change to:
+               https://api.676trades.org/downloads/BinaryScalper.ex5
+          -->
+          <button class="secondary" onclick="copyEaLink()">Copy EA download link</button>
+        </div>
+
+        <div class="note warn">
+          If the download fails, it usually means the file is not hosted yet. You must upload
+          <span class="mono">BinaryScalper.ex5</span> into your frontend repo at:
+          <span class="mono">/downloads/BinaryScalper.ex5</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 2 — Install MetaTrader 5</h3>
         <ol class="small">
-          <li>Download MT5 from the official website.</li>
           <li>Install MT5 on your Windows PC (or VPS).</li>
           <li>Login to your broker account inside MT5.</li>
         </ol>
       </div>
 
       <div class="step">
-        <h3>Step 2 — Install the 676Trades EA</h3>
+        <h3>Step 3 — Install the 676Trades EA into MT5</h3>
         <ol class="small">
           <li>Open MT5</li>
           <li>Click <b>File → Open Data Folder</b></li>
           <li>Open <b>MQL5 → Experts</b></li>
-          <li>Copy the EA file into the <b>Experts</b> folder</li>
+          <li>Copy the downloaded <b>BinaryScalper.ex5</b> into the <b>Experts</b> folder</li>
           <li>Restart MT5</li>
         </ol>
-        <div class="small" style="margin-top:10px;">
-          If you do not have the EA file yet, download it from your dashboard or the link provided by 676Trades support.
-        </div>
       </div>
 
       <div class="step">
-        <h3>Step 3 — Allow WebRequest</h3>
+        <h3>Step 4 — Allow WebRequest</h3>
         <ol class="small">
-          <li>In MT5 go to <b>Tools → Options → Expert Advisors</b></li>
+          <li>MT5 → <b>Tools → Options → Expert Advisors</b></li>
           <li>Enable <b>“Allow WebRequest for listed URLs”</b></li>
           <li>Add this URL:</li>
         </ol>
         <span class="code">https://api.676trades.org</span>
-        <div class="small" style="margin-top:10px;">
-          If you do not add this URL, the EA cannot communicate with the 676Trades backend.
-        </div>
       </div>
 
       <div class="step">
-        <h3>Step 4 — Attach the EA to a chart</h3>
+        <h3>Step 5 — Attach the EA to a chart</h3>
         <ol class="small">
           <li>Open a chart (example: <b>XAUUSD</b> on <b>M5</b>)</li>
-          <li>Find the EA in <b>Navigator → Expert Advisors</b></li>
-          <li>Drag the EA onto the chart</li>
+          <li>Navigator → Expert Advisors → drag <b>BinaryScalper</b> onto the chart</li>
           <li>Paste your API key into the EA input called <b>API_KEY</b></li>
           <li>Turn on <b>Algo Trading</b> in MT5</li>
         </ol>
-        <div class="small" style="margin-top:10px;">
-          Your API key is in <b>Dashboard</b> → <b>Copy API Key</b>. Do not share your key.
-        </div>
       </div>
 
       <div class="step">
-        <h3>Step 5 — Confirm connection</h3>
+        <h3>Step 6 — Confirm connection</h3>
         <ul class="small">
-          <li>In 676Trades Dashboard you should see: <b>EA Connected ✅</b></li>
-          <li>In MT5 check the <b>Experts</b> tab for messages like: <b>Backend ok</b></li>
+          <li>In Dashboard you should see: <b>EA Connected ✅</b></li>
+          <li>In MT5 → Experts tab: you should not see <b>Invalid API key</b></li>
         </ul>
-        <div class="small" style="margin-top:10px;">
-          If you see <b>Invalid API key</b>, copy the key again from your dashboard and paste it into the EA input exactly.
-        </div>
       </div>
 
       <div class="step">
         <h3>PC vs VPS (24/7 trading)</h3>
         <div class="small">
-          If you run MT5 on your personal computer, trading only runs while your computer is ON, MT5 is open, and the internet is connected.
-          For uninterrupted 24/7 uptime, many users choose a VPS.
+          The EA runs only while MT5 is open and connected. For uninterrupted uptime,
+          many users choose a VPS (optional).
         </div>
-        <div class="small" style="margin-top:10px;">
-          <b>Important:</b> 676Trades does not sell VPS services and is not affiliated with any VPS provider.
+        <div class="note">
+          676Trades does not sell VPS services and is not affiliated with any VPS provider.
         </div>
       </div>
 
       <div class="step">
         <h3>Mobile usage (phone / tablet)</h3>
         <div class="small">
-          The EA does not run on mobile. The EA runs inside MT5 on your PC or VPS.
-          You can still use the MT5 mobile app to monitor trades and account activity.
+          The EA does not run on mobile. Use the MT5 mobile app to monitor trades/account activity.
         </div>
       </div>
 
       <div class="step">
         <h3>Scam warning</h3>
         <div class="small">
-          676Trades will never ask for your broker password, MT5 login, or request that you send money to an individual.
+          676Trades will never ask for your broker password or request that you send money to an individual.
           Official access is only through <b>676trades.org</b>.
         </div>
       </div>
@@ -201,28 +211,30 @@
       </div>
     </div>
 
-    <footer class="footer">
+    <div class="footer">
       <div class="footer-inner">
         <span>© <span id="yr"></span> 676Trades</span>
-        <span class="dot">·</span>
+        <span class="dot">•</span>
         <a href="/terms.html">Terms</a>
-        <span class="dot">·</span>
+        <span class="dot">•</span>
         <a href="/privacy.html">Privacy</a>
-        <span class="dot">·</span>
-        <a href="/risk.html">Risk Disclosure</a>
-        <span class="dot">·</span>
-        <a href="mailto:support@676trades.org">Support</a>
+        <span class="dot">•</span>
+        <a href="/risk.html">Risk</a>
       </div>
-    </footer>
+    </div>
 
   </div>
 
   <script src="app.js"></script>
   <script>
-    (function(){
-      var el = document.getElementById("yr");
-      if(el) el.textContent = new Date().getFullYear();
-    })();
+    document.getElementById("yr").textContent = new Date().getFullYear();
+
+    function copyEaLink(){
+      const a = document.getElementById("eaLink");
+      const url = new URL(a.getAttribute("href"), window.location.origin).toString();
+      navigator.clipboard.writeText(url);
+      alert("EA download link copied.");
+    }
   </script>
 </body>
 </html>
