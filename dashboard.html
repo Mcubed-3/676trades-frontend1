@@ -9,10 +9,61 @@
     .badge.live { background:#16a34a; color:white; }
     .badge.dead { background:#f59e0b; color:black; }
     .smallmuted { opacity:0.75; font-size:12px; margin-top:6px; }
+
+    .banner{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,180,0,0.08);
+      border-radius:14px;
+      padding:14px 14px;
+      margin-bottom:14px;
+    }
+    .banner h3{ margin:0 0 6px 0; font-size:16px; }
+    .banner .muted{ opacity:0.85; font-size:13px; line-height:1.35; }
+    .banner .rowline{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .checkline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+    }
+    .checkline input{ width:18px; height:18px; }
+    .dangertext{ color:#ffb4b4; font-size:12px; opacity:0.9; }
+    .btn-disabled{
+      opacity:0.55;
+      pointer-events:none;
+      filter: grayscale(20%);
+    }
   </style>
 </head>
 <body>
   <div class="container">
+
+    <!-- RISK / COMPLIANCE BANNER -->
+    <div class="banner">
+      <h3>Risk disclaimer</h3>
+      <div class="muted">
+        Automated trading involves risk and can result in losses. 676Trades does not provide financial advice.
+        Use at your own risk. Past performance is not indicative of future results.
+      </div>
+
+      <div class="rowline">
+        <label class="checkline">
+          <input id="riskCheck" type="checkbox"/>
+          <span class="muted"><b>I understand the risk</b> and want to enable automated trading.</span>
+        </label>
+        <div id="riskHint" class="dangertext" style="display:none;">
+          Please tick the checkbox to enable “Start Algo”.
+        </div>
+      </div>
+    </div>
+
     <div class="nav">
       <div><b>676Trades</b></div>
       <div style="display:flex;gap:12px;align-items:center;">
@@ -177,6 +228,10 @@
     const msg = document.getElementById("msg");
     const msg2 = document.getElementById("msg2");
 
+    const startBtn = document.getElementById("startBtn");
+    const riskCheck = document.getElementById("riskCheck");
+    const riskHint = document.getElementById("riskHint");
+
     function requireLogin(){
       if(!getToken()){
         window.location.href="/login.html";
@@ -184,6 +239,19 @@
       }
       return true;
     }
+
+    function updateStartGate(){
+      const ok = !!riskCheck.checked;
+      if(ok){
+        startBtn.classList.remove("btn-disabled");
+        riskHint.style.display = "none";
+      }else{
+        startBtn.classList.add("btn-disabled");
+      }
+      return ok;
+    }
+
+    riskCheck.addEventListener("change", updateStartGate);
 
     function copyKey(){
       navigator.clipboard.writeText(getToken());
@@ -247,13 +315,22 @@
 
     document.getElementById("refreshBtn").onclick = refresh;
 
-    document.getElementById("startBtn").onclick = async ()=>{
+    startBtn.onclick = async ()=>{
+      // UI gate
+      if(!updateStartGate()){
+        riskHint.style.display = "block";
+        msg.textContent = "Please confirm the risk disclaimer first.";
+        return;
+      }
+
       msg.textContent = "Starting...";
       try{
         await api("/api/v1/toggle","POST",{ enabled:true });
         await refresh();
         msg.textContent = "Started.";
-      }catch(e){ msg.textContent = "Error: " + e.message; }
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
     };
 
     document.getElementById("stopBtn").onclick = async ()=>{
@@ -298,7 +375,11 @@
       msg2.textContent = "API key copied.";
     };
 
-    if(requireLogin()) refresh();
+    // init
+    if(requireLogin()){
+      updateStartGate(); // sets Start Algo disabled until checked
+      refresh();
+    }
   </script>
 </body>
 </html>
