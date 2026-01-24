@@ -15,7 +15,7 @@
 
     <div class="card">
       <h1>Create account</h1>
-      <div class="small">You’ll get your control API key after registration.</div>
+      <div class="small">Create an account to access the dashboard and get your MT5 API key.</div>
 
       <label>Email</label>
       <input id="email" type="email" placeholder="you@example.com"/>
@@ -23,14 +23,14 @@
       <label>Password</label>
       <input id="password" type="password" placeholder="Create a password"/>
 
+      <label>Confirm password</label>
+      <input id="password2" type="password" placeholder="Repeat password"/>
+
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
         <button id="btn">Register</button>
-        <button class="secondary" onclick="window.location.href='/login.html'">Go to login</button>
-      </div>
-
-      <!-- ✅ Nice onboarding link -->
-      <div style="margin-top:12px;">
-        Already have an account? <a href="/login.html">Login</a>
+        <a class="secondary" href="/login.html" style="display:inline-block;padding:12px 14px;border-radius:12px;border:1px solid var(--border);text-decoration:none;">
+          Already have an account?
+        </a>
       </div>
 
       <div id="msg" class="toast"></div>
@@ -39,21 +39,47 @@
 
   <script src="app.js"></script>
   <script>
-    document.getElementById("btn").onclick = async () => {
+    function onEnter(el, fn){
+      el.addEventListener("keydown", (e)=>{
+        if(e.key === "Enter") fn();
+      });
+    }
+
+    async function doRegister(){
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
+      const password2 = document.getElementById("password2").value.trim();
       const msg = document.getElementById("msg");
-      msg.textContent = "Registering...";
+
+      if(password.length < 6){
+        msg.textContent = "Password must be at least 6 characters.";
+        return;
+      }
+      if(password !== password2){
+        msg.textContent = "Passwords do not match.";
+        return;
+      }
+
+      msg.textContent = "Creating account...";
 
       try{
         const data = await api("/auth/register","POST",{email,password});
-        setToken(data.api_key);
-        msg.textContent = "Registered! Redirecting...";
-        setTimeout(()=>window.location.href="/dashboard.html",700);
+
+        // NEW: store JWT + api key
+        setAccessToken(data.access_token);
+        setApiKey(data.api_key);
+
+        msg.textContent = "Registered. Redirecting...";
+        setTimeout(()=>window.location.href="/dashboard.html", 650);
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
-    };
+    }
+
+    document.getElementById("btn").onclick = doRegister;
+    onEnter(document.getElementById("email"), doRegister);
+    onEnter(document.getElementById("password"), doRegister);
+    onEnter(document.getElementById("password2"), doRegister);
   </script>
 </body>
 </html>
