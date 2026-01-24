@@ -8,55 +8,48 @@
 </head>
 <body>
   <div class="container">
+    <div class="nav">
+      <div><b>676Trades</b></div>
+      <div><a href="/login.html">Login</a></div>
+    </div>
+
     <div class="card">
-      <h1>Reset Password</h1>
-      <div class="small">Enter your new password.</div>
-      <hr/>
+      <h1>Reset password</h1>
+      <div class="small">Set a new password for your account.</div>
 
       <label>New password</label>
-      <input id="pw" type="password" placeholder="Minimum 8 characters"/>
-
-      <label style="margin-top:10px;">Confirm new password</label>
-      <input id="pw2" type="password" placeholder="Repeat password"/>
+      <input id="pw" type="password" placeholder="At least 8 characters"/>
 
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="resetBtn">Reset password</button>
-        <a class="secondary" href="/login.html">Back to login</a>
+        <button id="btn">Update password</button>
       </div>
 
       <div id="msg" class="toast"></div>
     </div>
   </div>
 
+  <script src="app.js"></script>
   <script>
-    const BACKEND = "https://api.676trades.org";
-    const msg = document.getElementById("msg");
-
     function getTokenFromUrl(){
-      const p = new URLSearchParams(window.location.search);
-      return (p.get("token") || "").trim();
+      const u = new URL(window.location.href);
+      return (u.searchParams.get("token") || "").trim();
     }
 
-    document.getElementById("resetBtn").onclick = async () => {
-      msg.textContent = "Resetting...";
+    document.getElementById("btn").onclick = async ()=>{
+      const token = getTokenFromUrl();
+      const new_password = document.getElementById("pw").value.trim();
+      const msg = document.getElementById("msg");
+
+      if(!token){
+        msg.textContent = "Missing token. Use the link from your email.";
+        return;
+      }
+
+      msg.textContent = "Updating...";
       try{
-        const token = getTokenFromUrl();
-        const pw = document.getElementById("pw").value;
-        const pw2 = document.getElementById("pw2").value;
-        if(!token) throw new Error("Missing token in URL. Use the link from your email.");
-        if(pw.length < 8) throw new Error("Password must be at least 8 characters.");
-        if(pw !== pw2) throw new Error("Passwords do not match.");
-
-        const res = await fetch(`${BACKEND}/auth/reset-password`,{
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ token, new_password: pw })
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
-
-        msg.textContent = "Password reset successful. Redirecting to login...";
-        setTimeout(()=> window.location.href="/login.html", 1200);
+        await api("/auth/reset-password","POST",{ token, new_password });
+        msg.textContent = "Password updated. Redirecting to login...";
+        setTimeout(()=>window.location.href="/login.html",900);
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
