@@ -28,6 +28,8 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 13px;
     }
+    ul,ol{ margin:8px 0 0 18px; }
+    li{ margin:6px 0; }
     .pill{
       display:inline-block;
       padding:4px 10px;
@@ -37,13 +39,6 @@
       background:rgba(255,255,255,.04);
       margin-left:8px;
     }
-    ul,ol{ margin:8px 0 0 18px; }
-    li{ margin:6px 0; }
-    .links a{ display:inline-block; margin-right:10px; }
-
-    .dlrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
-    .note{font-size:12px;opacity:.8;line-height:1.35;margin-top:8px;}
-    .warn{color:#ffb4b4;opacity:0.9;}
   </style>
 </head>
 <body>
@@ -71,82 +66,53 @@
     <div class="card">
       <h1>EA Setup Guide</h1>
       <div class="small">
-        Follow these steps to install the 676Trades EA in MetaTrader 5 and connect it to your dashboard.
+        Install the 676Trades EA in MetaTrader 5 and connect it to your dashboard.
       </div>
       <hr/>
 
-      <h2 style="margin-top:0;">How 676Trades works</h2>
-      <div class="small">
-        The EA runs inside MetaTrader 5 on your own computer or VPS. Your 676Trades dashboard sends your settings to the EA,
-        and the EA executes trades on your broker account through MT5.
-      </div>
-
       <div class="step">
-        <h3>What you need</h3>
-        <ul class="small">
-          <li>A Windows PC (or a Windows VPS)</li>
-          <li>MetaTrader 5 installed</li>
-          <li>A broker account that supports MT5</li>
-          <li>Internet connection</li>
-          <li>Your 676Trades API key (Dashboard → Copy API Key)</li>
-        </ul>
-      </div>
-
-      <div class="step">
-        <h3>Broker and platform links <span class="pill">External links</span></h3>
+        <h3>Supported markets</h3>
         <div class="small">
-          Optional convenience links. 676Trades is not affiliated with any broker or platform listed below.
-          Always review broker terms, fees, and regional availability yourself.
-        </div>
-        <div class="links" style="margin-top:10px;">
-          <a href="https://www.metatrader5.com" target="_blank" rel="noopener noreferrer">MetaTrader 5 (official)</a>
-          <a href="https://pepperstone.com" target="_blank" rel="noopener noreferrer">Pepperstone</a>
-          <a href="https://deriv.com" target="_blank" rel="noopener noreferrer">Deriv</a>
-        </div>
-        <div class="note">
-          <b>Note:</b> Pepperstone is commonly used by UK-based traders. Deriv is commonly used by users outside the UK.
-          Availability may vary by region.
+          The current public version supports:
+          <ul>
+            <li><b>Gold:</b> XAUUSD</li>
+            <li><b>Major FX:</b> EURUSD, GBPUSD, USDJPY</li>
+          </ul>
+          <div style="margin-top:8px;">
+            <b>Crypto & indices</b> are temporarily locked while dedicated strategies are developed.
+          </div>
         </div>
       </div>
 
       <div class="step">
         <h3>Step 1 — Download the EA</h3>
         <div class="small">
-          Download the EA file and keep it somewhere easy to find (for example: Downloads folder).
+          Download the EA file from this page:
         </div>
-
-        <div class="dlrow">
-          <!-- ✅ Recommended: host the EA in your frontend repo under /downloads/ -->
-          <a id="eaLink" href="/downloads/BinaryScalper.ex5" class="secondary" download>Download EA (BinaryScalper.ex5)</a>
-
-          <!-- Optional: if you later serve from backend, change to:
-               https://api.676trades.org/downloads/BinaryScalper.ex5
-          -->
-          <button class="secondary" onclick="copyEaLink()">Copy EA download link</button>
+        <div style="margin-top:10px;">
+          <!-- IMPORTANT: change the href to where you host the EA file -->
+          <a class="buttonlink" href="/downloads/BinaryScalper.ex5">Download EA (BinaryScalper.ex5)</a>
         </div>
-
-        <div class="note warn">
-          If the download fails, it usually means the file is not hosted yet. You must upload
-          <span class="mono">BinaryScalper.ex5</span> into your frontend repo at:
-          <span class="mono">/downloads/BinaryScalper.ex5</span>
+        <div class="small" style="margin-top:10px;opacity:.85;">
+          If the link doesn’t work yet, upload the file to your frontend hosting (or a private link) and update this URL.
         </div>
       </div>
 
       <div class="step">
         <h3>Step 2 — Install MetaTrader 5</h3>
         <ol class="small">
-          <li>Install MT5 on your Windows PC (or VPS).</li>
+          <li>Install MetaTrader 5 on a Windows PC (or Windows VPS).</li>
           <li>Login to your broker account inside MT5.</li>
         </ol>
       </div>
 
       <div class="step">
-        <h3>Step 3 — Install the 676Trades EA into MT5</h3>
+        <h3>Step 3 — Install the EA into MT5</h3>
         <ol class="small">
           <li>Open MT5</li>
-          <li>Click <b>File → Open Data Folder</b></li>
-          <li>Open <b>MQL5 → Experts</b></li>
-          <li>Copy the downloaded <b>BinaryScalper.ex5</b> into the <b>Experts</b> folder</li>
+          <li>File → Open Data Folder</li>
+          <li>MQL5 → Experts</li>
+          <li>Copy the EA file into the <b>Experts</b> folder</li>
           <li>Restart MT5</li>
         </ol>
       </div>
@@ -154,9 +120,9 @@
       <div class="step">
         <h3>Step 4 — Allow WebRequest</h3>
         <ol class="small">
-          <li>MT5 → <b>Tools → Options → Expert Advisors</b></li>
-          <li>Enable <b>“Allow WebRequest for listed URLs”</b></li>
-          <li>Add this URL:</li>
+          <li>MT5 → Tools → Options → Expert Advisors</li>
+          <li>Enable “Allow WebRequest for listed URLs”</li>
+          <li>Add:</li>
         </ol>
         <span class="code">https://api.676trades.org</span>
       </div>
@@ -165,43 +131,20 @@
         <h3>Step 5 — Attach the EA to a chart</h3>
         <ol class="small">
           <li>Open a chart (example: <b>XAUUSD</b> on <b>M5</b>)</li>
-          <li>Navigator → Expert Advisors → drag <b>BinaryScalper</b> onto the chart</li>
+          <li>Navigator → Expert Advisors → drag the EA to the chart</li>
           <li>Paste your API key into the EA input called <b>API_KEY</b></li>
           <li>Turn on <b>Algo Trading</b> in MT5</li>
         </ol>
+        <div class="small" style="margin-top:10px;">
+          Your API key is on Dashboard → <b>Copy API Key</b>. Do not share it.
+        </div>
       </div>
 
       <div class="step">
         <h3>Step 6 — Confirm connection</h3>
-        <ul class="small">
-          <li>In Dashboard you should see: <b>EA Connected ✅</b></li>
-          <li>In MT5 → Experts tab: you should not see <b>Invalid API key</b></li>
-        </ul>
-      </div>
-
-      <div class="step">
-        <h3>PC vs VPS (24/7 trading)</h3>
         <div class="small">
-          The EA runs only while MT5 is open and connected. For uninterrupted uptime,
-          many users choose a VPS (optional).
-        </div>
-        <div class="note">
-          676Trades does not sell VPS services and is not affiliated with any VPS provider.
-        </div>
-      </div>
-
-      <div class="step">
-        <h3>Mobile usage (phone / tablet)</h3>
-        <div class="small">
-          The EA does not run on mobile. Use the MT5 mobile app to monitor trades/account activity.
-        </div>
-      </div>
-
-      <div class="step">
-        <h3>Scam warning</h3>
-        <div class="small">
-          676Trades will never ask for your broker password or request that you send money to an individual.
-          Official access is only through <b>676trades.org</b>.
+          In Dashboard you should see: <b>EA Connected ✅</b>.
+          If it says <b>Invalid API key</b>, copy again from Dashboard and paste exactly.
         </div>
       </div>
 
@@ -228,13 +171,6 @@
   <script src="app.js"></script>
   <script>
     document.getElementById("yr").textContent = new Date().getFullYear();
-
-    function copyEaLink(){
-      const a = document.getElementById("eaLink");
-      const url = new URL(a.getAttribute("href"), window.location.origin).toString();
-      navigator.clipboard.writeText(url);
-      alert("EA download link copied.");
-    }
   </script>
 </body>
 </html>
