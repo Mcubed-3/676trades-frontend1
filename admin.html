@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html>
 <head>
   <meta charset="utf-8"/>
@@ -71,6 +71,11 @@
       <div class="card">
         <h2 style="margin-top:0;">User details</h2>
         <div id="details" class="small muted">Select a user.</div>
+
+        <div id="actions" style="margin-top:12px;display:none;gap:10px;flex-wrap:wrap;">
+          <button id="enableBtn">Force Enable EA</button>
+          <button id="disableBtn" class="danger">Force Disable EA</button>
+        </div>
 
         <div style="margin-top:14px;">
           <h3 style="margin:10px 0;">Recent trades</h3>
@@ -162,8 +167,11 @@
     async function loadUser(id){
       const details = document.getElementById("details");
       const trades = document.getElementById("trades");
+      const actions = document.getElementById("actions");
+
       details.textContent = "Loading user...";
       trades.textContent = "Loading trades...";
+      actions.style.display = "none";
 
       const data = await adminFetch(`/admin/user/${id}/activity`);
       const u = data.user;
@@ -186,6 +194,33 @@
         <div><b>EA TF:</b> <span class="mono">${u.last_seen_tf || "—"}</span></div>
         <div><b>Last IP:</b> <span class="mono">${u.last_seen_ip || "—"}</span></div>
       `;
+
+      actions.style.display = "flex";
+
+      document.getElementById("disableBtn").onclick = async () => {
+        if(!confirm(`Disable EA for ${u.email}?`)) return;
+        await adminFetch(`/admin/user/${u.id}/disable`, "POST", {});
+        await loadUsers();
+        await loadUser(u.id);
+        document.getElementById("msg").textContent = "EA disabled.";
+      };
+
+      document.getElementById("enableBtn").onclick = async () => {
+        try{
+          await adminFetch(`/admin/user/${u.id}/enable`, "POST", {});
+        }catch(e){
+          if(String(e.message || "").includes("402")){
+            const force = confirm("User is not paid/trial. Force enable anyway?");
+            if(!force) throw e;
+            await adminFetch(`/admin/user/${u.id}/enable`, "POST", { force:true });
+          }else{
+            throw e;
+          }
+        }
+        await loadUsers();
+        await loadUser(u.id);
+        document.getElementById("msg").textContent = "EA enabled.";
+      };
 
       if(!data.trades || data.trades.length === 0){
         trades.textContent = "No trades posted yet.";
@@ -212,7 +247,6 @@
       if(e.key === "Enter") loadUsers();
     });
 
-    // start
     loadUsers().catch(e => document.getElementById("msg").textContent = "Error: " + e.message);
   </script>
 </body>
