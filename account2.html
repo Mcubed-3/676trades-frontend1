@@ -5,17 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>676Trades - Account</title>
   <link rel="stylesheet" href="styles.css"/>
-  <style>
-    .badge.live { background:#16a34a; color:white; }
-    .badge.dead { background:#f59e0b; color:black; }
-  </style>
 </head>
 <body>
   <div class="container">
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/setup2.html">Setup</a>
         <a href="/dashboard.html">Dashboard</a>
+        <a href="/billing.html">Billing</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
@@ -27,16 +25,16 @@
 
       <div class="kv">
         <div><b>Email</b><span id="email">-</span></div>
+        <div><b>Display name</b><span id="nameText">-</span></div>
         <div><b>Created</b><span id="created">-</span></div>
         <div><b>Last login</b><span id="last">-</span></div>
-
-        <div><b>EA</b><span id="eaBadge" class="badge dead">Offline ⚠️</span></div>
-        <div><b>Last seen</b><span id="lastSeen">-</span></div>
-        <div><b>Last symbol</b><span id="lastSymbol">-</span></div>
       </div>
 
       <div style="margin-top:16px;">
+        <label>Display name (optional)</label>
+        <input id="display_name" placeholder="e.g. Monair"/>
         <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button id="saveNameBtn">Save name</button>
           <button id="copyKeyBtn" class="secondary">Copy API key</button>
         </div>
       </div>
@@ -57,7 +55,29 @@
 
       <div id="msg" class="toast"></div>
     </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>© <span id="yr"></span> 676Trades</span>
+        <span class="dot">·</span>
+        <a href="/terms.html">Terms</a>
+        <span class="dot">·</span>
+        <a href="/privacy.html">Privacy</a>
+        <span class="dot">·</span>
+        <a href="/risk.html">Risk Disclosure</a>
+        <span class="dot">·</span>
+        <a href="mailto:support@676trades.org">Support</a>
+      </div>
+    </footer>
+
   </div>
+
+  <script>
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
 
   <script src="app.js"></script>
   <script>
@@ -76,26 +96,27 @@
       try{
         const me = await api("/account/me","GET");
         document.getElementById("email").textContent = me.email || "-";
+        document.getElementById("nameText").textContent = me.display_name || "-";
         document.getElementById("created").textContent = me.created_at ? new Date(me.created_at).toLocaleString() : "-";
         document.getElementById("last").textContent = me.last_login_at ? new Date(me.last_login_at).toLocaleString() : "-";
-
-        const eaBadge = document.getElementById("eaBadge");
-        if(me.ea_connected){
-          eaBadge.textContent = "Connected ✅";
-          eaBadge.className = "badge live";
-        }else{
-          eaBadge.textContent = "Offline ⚠️";
-          eaBadge.className = "badge dead";
-        }
-
-        document.getElementById("lastSeen").textContent = me.last_seen_at ? new Date(me.last_seen_at).toLocaleString() : "-";
-        document.getElementById("lastSymbol").textContent = me.last_seen_symbol || "-";
-
+        document.getElementById("display_name").value = me.display_name || "";
         msg.textContent = "";
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
     }
+
+    document.getElementById("saveNameBtn").onclick = async ()=>{
+      msg.textContent = "Saving...";
+      try{
+        const display_name = document.getElementById("display_name").value.trim();
+        await api("/account/profile","POST",{ display_name });
+        msg.textContent = "Saved.";
+        await loadMe();
+      }catch(e){
+        msg.textContent = "Error: " + e.message;
+      }
+    };
 
     document.getElementById("copyKeyBtn").onclick = async ()=>{
       const key = getToken();
@@ -110,7 +131,7 @@
         const email = document.getElementById("email").textContent.trim();
         const data = await api("/auth/rotate-key","POST",{ email, password });
         setToken(data.api_key);
-        msg.textContent = "Rotated. New API key saved + copied.";
+        msg.textContent = "Rotated. New API key saved in browser + copied.";
         await navigator.clipboard.writeText(data.api_key);
       }catch(e){
         msg.textContent = "Error: " + e.message;
