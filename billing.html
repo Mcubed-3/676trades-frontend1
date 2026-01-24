@@ -65,7 +65,29 @@
 
       <div id="msg" class="toast"></div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>© <span id="yr"></span> 676Trades</span>
+        <span class="dot">·</span>
+        <a href="/terms.html">Terms</a>
+        <span class="dot">·</span>
+        <a href="/privacy.html">Privacy</a>
+        <span class="dot">·</span>
+        <a href="/risk.html">Risk Disclosure</a>
+        <span class="dot">·</span>
+        <a href="mailto:support@676trades.org">Support</a>
+      </div>
+    </footer>
   </div>
+
+  <script>
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
 
   <script src="app.js"></script>
   <script>
