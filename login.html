@@ -10,7 +10,12 @@
   <div class="container">
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div><a href="/register.html">Register</a></div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/register.html">Register</a>
+      </div>
     </div>
 
     <div class="card">
@@ -46,11 +51,33 @@
         <div id="forgotMsg" class="toast"></div>
       </div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>© <span id="yr"></span> 676Trades</span>
+        <span class="dot">·</span>
+        <a href="/terms.html">Terms</a>
+        <span class="dot">·</span>
+        <a href="/privacy.html">Privacy</a>
+        <span class="dot">·</span>
+        <a href="/risk.html">Risk Disclosure</a>
+        <span class="dot">·</span>
+        <a href="mailto:support@676trades.org">Support</a>
+      </div>
+    </footer>
   </div>
+
+  <script>
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
 
   <script src="app.js"></script>
   <script>
-    document.getElementById("btn").onclick = async () => {
+    async function doLogin(){
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const msg = document.getElementById("msg");
@@ -64,7 +91,17 @@
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
-    };
+    }
+
+    document.getElementById("btn").onclick = doLogin;
+
+    // Enter to submit
+    document.getElementById("password").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") doLogin();
+    });
+    document.getElementById("email").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") doLogin();
+    });
 
     const forgotBox = document.getElementById("forgotBox");
     const forgotMsg = document.getElementById("forgotMsg");
