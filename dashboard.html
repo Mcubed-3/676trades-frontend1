@@ -66,7 +66,7 @@
 
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:12px;align-items:center;">
         <a href="/setup2.html">Setup</a>
         <a href="/account2.html">Account</a>
         <a href="/billing.html">Billing</a>
@@ -105,73 +105,148 @@
     <div class="card">
       <h2>Trading Settings</h2>
 
+      <div class="hint">
+        <b>Recommended for beginners:</b> Start with <b>XAUUSD</b> and <b>0.01</b> lot size.
+        Save settings, then start the algo once your EA shows Connected.
+      </div>
+
       <div class="row">
         <div>
-          <label>Trading Pairs (comma-separated)</label>
-          <input id="pairs" placeholder="XAUUSD,EURUSD,GBPUSD,USDJPY" value="XAUUSD"/>
+          <div class="label-row">
+            <label style="margin:10px 0 6px;">Trading Pairs</label>
+            <span class="info">i
+              <span class="tip">
+                Enter symbols separated by commas. Example: XAUUSD,EURUSD.
+                Use only symbols available on your broker.
+              </span>
+            </span>
+          </div>
+          <input id="pairs" placeholder="XAUUSD,EURUSD" value="XAUUSD"/>
           <div class="small" style="margin-top:6px;opacity:0.8;">
-            Example: XAUUSD,EURUSD,GBPUSD,USDJPY
+            Keep it simple: start with 1–2 pairs.
           </div>
         </div>
 
         <div>
-          <label>Lot Size</label>
+          <div class="label-row">
+            <label style="margin:10px 0 6px;">Lot Size</label>
+            <span class="info">i
+              <span class="tip">
+                Trade volume per position. Smaller = lower risk.
+                Example: 0.01 is a common starting size.
+              </span>
+            </span>
+          </div>
           <input id="lot" type="number" step="0.01" value="0.01"/>
         </div>
       </div>
 
       <div class="row">
         <div>
-          <label>SL Mode</label>
+          <div class="label-row">
+            <label style="margin:10px 0 6px;">Stop Loss Mode</label>
+            <span class="info">i
+              <span class="tip">
+                Dynamic = EA calculates SL from price structure.
+                Fixed = uses your Fixed SL pips (advanced).
+              </span>
+            </span>
+          </div>
           <select id="sl_mode">
-            <option value="dynamic">Dynamic (pattern-based)</option>
-            <option value="fixed">Fixed (pips)</option>
+            <option value="dynamic">Dynamic (recommended)</option>
+            <option value="fixed">Fixed (advanced)</option>
           </select>
         </div>
 
         <div>
-          <label>TP Mode</label>
+          <div class="label-row">
+            <label style="margin:10px 0 6px;">Take Profit Mode</label>
+            <span class="info">i
+              <span class="tip">
+                RR = targets a multiple of risk (simple + popular).
+                Fixed/Pattern are advanced options.
+              </span>
+            </span>
+          </div>
           <select id="tp_mode">
-            <option value="rr">Risk / Reward (RR)</option>
-            <option value="pattern_mult">Pattern multiplier</option>
-            <option value="fixed">Fixed (pips)</option>
+            <option value="rr">Risk / Reward (RR) (recommended)</option>
+            <option value="pattern_mult">Pattern multiplier (advanced)</option>
+            <option value="fixed">Fixed (advanced)</option>
           </select>
         </div>
       </div>
 
       <div class="row">
         <div>
-          <label>Minimum pips (SL &amp; TP floor)</label>
-          <input id="min_pips" type="number" value="50"/>
-        </div>
-
-        <div>
-          <label>SL buffer pips (beyond candle high/low)</label>
-          <input id="sl_buffer_pips" type="number" value="5"/>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>RR (used if TP Mode = RR)</label>
+          <div class="label-row">
+            <label style="margin:10px 0 6px;">RR (Risk/Reward)</label>
+            <span class="info">i
+              <span class="tip">
+                RR=1 means TP distance equals SL distance.
+                RR=2 targets double the SL distance.
+              </span>
+            </span>
+          </div>
           <input id="rr" type="number" step="0.1" value="1.0"/>
         </div>
 
         <div>
-          <label>Pattern TP Multiplier</label>
-          <input id="pattern_tp_mult" type="number" step="0.1" value="1.5"/>
+          <label> </label>
+          <div class="small" style="opacity:0.8;margin-top:12px;">
+            If you’re unsure, keep RR at <b>1.0</b>.
+          </div>
         </div>
       </div>
 
-      <div class="row">
+      <!-- ADVANCED TOGGLE -->
+      <div id="advToggle" class="advanced-toggle" style="margin-top:12px;">
         <div>
-          <label>Fixed SL pips</label>
-          <input id="fixed_sl_pips" type="number" value="50"/>
+          <b>Advanced settings</b>
+          <div class="muted">Optional. Most users can leave these alone.</div>
+        </div>
+        <div id="advArrow" class="muted">▼</div>
+      </div>
+
+      <div id="advBox" class="advanced-box">
+        <div class="row">
+          <div>
+            <label>Minimum pips (floor)</label>
+            <input id="min_pips" type="number" value="50"/>
+            <div class="small" style="opacity:.8;">Prevents very small SL/TP distances.</div>
+          </div>
+
+          <div>
+            <label>SL buffer pips</label>
+            <input id="sl_buffer_pips" type="number" value="5"/>
+            <div class="small" style="opacity:.8;">Small extra space to reduce stop-outs.</div>
+          </div>
         </div>
 
-        <div>
-          <label>Fixed TP pips</label>
-          <input id="fixed_tp_pips" type="number" value="50"/>
+        <div class="row">
+          <div>
+            <label>Pattern TP Multiplier</label>
+            <input id="pattern_tp_mult" type="number" step="0.1" value="1.5"/>
+            <div class="small" style="opacity:.8;">Used only when TP Mode = Pattern multiplier.</div>
+          </div>
+
+          <div>
+            <label> </label>
+            <div class="small" style="opacity:.8;margin-top:12px;">
+              Only change these if you know exactly why.
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Fixed SL pips</label>
+            <input id="fixed_sl_pips" type="number" value="50"/>
+          </div>
+
+          <div>
+            <label>Fixed TP pips</label>
+            <input id="fixed_tp_pips" type="number" value="50"/>
+          </div>
         </div>
       </div>
 
@@ -181,14 +256,6 @@
       </div>
 
       <div id="msg2" class="toast"></div>
-    </div>
-
-    <!-- MT5 ONBOARDING -->
-    <div class="card">
-      <h2>MT5 Setup (Plug & Play)</h2>
-      <div class="small">Use the Setup guide for the full instructions.</div>
-      <hr/>
-      <button class="secondary" onclick="window.location.href='/setup2.html'">Open Setup Guide</button>
     </div>
 
     <footer class="footer">
@@ -205,16 +272,47 @@
       </div>
     </footer>
 
+    <script>
+      (function(){
+        var el = document.getElementById("yr");
+        if(el) el.textContent = new Date().getFullYear();
+      })();
+    </script>
+
   </div>
 
+  <script src="app.js"></script>
   <script>
+    // Mobile-friendly tooltip toggle
     (function(){
-      var el = document.getElementById("yr");
-      if(el) el.textContent = new Date().getFullYear();
+      document.querySelectorAll(".info").forEach(el=>{
+        el.addEventListener("click", (e)=>{
+          if(window.matchMedia("(max-width: 720px)").matches){
+            e.preventDefault();
+            e.stopPropagation();
+            el.classList.toggle("open");
+          }
+        });
+      });
+      document.addEventListener("click", ()=>{
+        document.querySelectorAll(".info.open").forEach(x=>x.classList.remove("open"));
+      });
+    })();
+
+    // Advanced settings toggle
+    (function(){
+      const t = document.getElementById("advToggle");
+      const box = document.getElementById("advBox");
+      const arrow = document.getElementById("advArrow");
+      if(t && box){
+        t.addEventListener("click", ()=>{
+          const open = box.classList.toggle("show");
+          if(arrow) arrow.textContent = open ? "▲" : "▼";
+        });
+      }
     })();
   </script>
 
-  <script src="app.js"></script>
   <script>
     const msg = document.getElementById("msg");
     const msg2 = document.getElementById("msg2");
@@ -243,11 +341,6 @@
     }
 
     riskCheck.addEventListener("change", updateStartGate);
-
-    function copyKey(){
-      navigator.clipboard.writeText(getToken());
-      msg2.textContent = "API key copied.";
-    }
 
     function pickPairs(s){
       return (s.pairs || s.pair || "XAUUSD");
@@ -278,7 +371,6 @@
       document.getElementById("pairsText").textContent = pairsVal;
       document.getElementById("lotText").textContent = (s.lot_size ?? "-");
 
-      // EA heartbeat indicator
       const eaBadge = document.getElementById("eaBadge");
       const lastSeen = document.getElementById("lastSeenText");
 
@@ -342,12 +434,11 @@
           sl_mode: document.getElementById("sl_mode").value,
           tp_mode: document.getElementById("tp_mode").value,
 
+          // advanced
           min_pips: Number(document.getElementById("min_pips").value),
           sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
-
           rr: Number(document.getElementById("rr").value),
           pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
-
           fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
           fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
         });
@@ -365,7 +456,6 @@
       msg2.textContent = "API key copied.";
     };
 
-    // init
     if(requireLogin()){
       updateStartGate();
       refresh();
