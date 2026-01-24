@@ -57,7 +57,8 @@
 
     <div class="nav">
       <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/setup2.html">Setup</a>
         <a href="/dashboard.html">Dashboard</a>
         <a href="/billing.html">Billing</a>
         <a href="/account2.html">Account</a>
@@ -200,24 +201,28 @@
       </div>
     </div>
 
-    <!-- Footer (optional if you’re adding footers everywhere) -->
-    <div class="footer">
+    <footer class="footer">
       <div class="footer-inner">
         <span>© <span id="yr"></span> 676Trades</span>
-        <span class="dot">•</span>
+        <span class="dot">·</span>
         <a href="/terms.html">Terms</a>
-        <span class="dot">•</span>
+        <span class="dot">·</span>
         <a href="/privacy.html">Privacy</a>
-        <span class="dot">•</span>
-        <a href="/risk.html">Risk</a>
+        <span class="dot">·</span>
+        <a href="/risk.html">Risk Disclosure</a>
+        <span class="dot">·</span>
+        <a href="mailto:support@676trades.org">Support</a>
       </div>
-    </div>
+    </footer>
 
   </div>
 
   <script src="app.js"></script>
   <script>
-    document.getElementById("yr").textContent = new Date().getFullYear();
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
   </script>
 </body>
 </html>
