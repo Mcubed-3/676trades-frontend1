@@ -36,6 +36,14 @@ function requireLogin(redirectTo="/login.html"){
   return true;
 }
 
+// ---------- Tiny UX message (session expiry) ----------
+function onSessionExpired(){
+  clearSession();
+  // Keep it tiny + beginner-friendly
+  alert("Your session expired. Please log in again.");
+  window.location.href = "/login.html";
+}
+
 // ---------- API wrapper ----------
 async function api(path, method="GET", body=null){
   const headers = { "Content-Type": "application/json" };
@@ -49,19 +57,20 @@ async function api(path, method="GET", body=null){
     body: body ? JSON.stringify(body) : null
   });
 
+  // If JWT expired/invalid, force re-login (simple UX)
+  if(res.status === 401){
+    onSessionExpired();
+    throw new Error("Session expired");
+  }
+
   const text = await res.text();
   let data;
   try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
 
   if(!res.ok){
     const msg = data?.error || data?.message || `HTTP ${res.status}`;
-
-    // If JWT expired/invalid, force re-login (keeps UX simple)
-    if(res.status === 401){
-      // backend returns "Token expired" or "Invalid token"
-      clearSession();
-    }
     throw new Error(msg);
   }
+
   return data;
 }
