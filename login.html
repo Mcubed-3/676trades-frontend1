@@ -5,18 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>676Trades - Login</title>
   <link rel="stylesheet" href="styles.css"/>
-  <style>
-    .notice{
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(79,124,255,0.10);
-      border-radius:14px;
-      padding:12px 14px;
-      margin-bottom:12px;
-      font-size:13px;
-      opacity:.92;
-      display:none;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -27,19 +15,17 @@
 
     <div class="card">
       <h1>Login</h1>
-      <div class="small">Sign in to access your dashboard and settings.</div>
-
-      <div id="notice" class="notice"></div>
+      <div class="small">Login to access your dashboard. Your MT5 EA key is available after login.</div>
 
       <label>Email</label>
-      <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
+      <input id="email" type="email" placeholder="you@example.com"/>
 
       <label>Password</label>
-      <input id="password" type="password" placeholder="Your password" autocomplete="current-password"/>
+      <input id="password" type="password" placeholder="Your password"/>
 
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
         <button id="btn">Login</button>
-        <button id="forgotBtn" class="secondary" type="button">Forgot password?</button>
+        <button id="forgotBtn" class="secondary">Forgot password?</button>
       </div>
 
       <div id="msg" class="toast"></div>
@@ -50,11 +36,11 @@
         <div class="small">Enter your email and we’ll send a reset link (if the account exists).</div>
 
         <label style="margin-top:10px;">Email</label>
-        <input id="forgotEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+        <input id="forgotEmail" type="email" placeholder="you@example.com"/>
 
         <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-          <button id="sendResetBtn" type="button">Send reset email</button>
-          <button id="cancelForgotBtn" class="secondary" type="button">Cancel</button>
+          <button id="sendResetBtn">Send reset email</button>
+          <button id="cancelForgotBtn" class="secondary">Cancel</button>
         </div>
 
         <div id="forgotMsg" class="toast"></div>
@@ -64,23 +50,6 @@
 
   <script src="app.js"></script>
   <script>
-    // Optional message banner
-    (function(){
-      const m = readMsgParam();
-      const notice = document.getElementById("notice");
-      if(!m) return;
-
-      const map = {
-        expired: "Your session expired. Please login again.",
-        login: "Please login to continue.",
-        loggedout: "You’ve been logged out."
-      };
-      if(map[m]){
-        notice.textContent = map[m];
-        notice.style.display = "block";
-      }
-    })();
-
     document.getElementById("btn").onclick = async () => {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
@@ -90,11 +59,12 @@
       try{
         const data = await api("/auth/login","POST",{email,password});
 
-        // ✅ Store both correctly
-        setAuthFromResponse(data);
+        // IMPORTANT: store JWT + api_key separately
+        setAccessToken(data.access_token);
+        setApiKey(data.api_key);
 
         msg.textContent = "Logged in. Redirecting...";
-        setTimeout(()=>window.location.href="/dashboard.html",600);
+        setTimeout(()=>window.location.href="/dashboard.html",700);
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
