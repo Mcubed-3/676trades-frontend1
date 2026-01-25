@@ -5,30 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>676Trades - Register</title>
   <link rel="stylesheet" href="styles.css"/>
-  <style>
-    .banner{
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(255,180,0,0.08);
-      border-radius:14px;
-      padding:14px;
-      margin-bottom:14px;
-    }
-    .banner h3{ margin:0 0 6px 0; font-size:16px; }
-    .banner .muted{ opacity:0.88; font-size:13px; line-height:1.4; }
-  </style>
 </head>
 <body>
   <div class="container">
-
-    <div class="banner">
-      <h3>Important notice</h3>
-      <div class="muted">
-        676Trades provides access to automated trading software (an Expert Advisor) only.
-        We do not provide financial advice, investment guarantees, or managed accounts.
-        Trading involves risk and you may lose part or all of your capital.
-      </div>
-    </div>
-
     <div class="nav">
       <div><b>676Trades</b></div>
       <div><a href="/login.html">Login</a></div>
@@ -36,20 +15,16 @@
 
     <div class="card">
       <h1>Create account</h1>
-      <div class="small">Register to access your dashboard and get your EA API key.</div>
+      <div class="small">Create your account to access the dashboard and your MT5 EA key.</div>
 
       <label>Email</label>
-      <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
+      <input id="email" type="email" placeholder="you@example.com"/>
 
       <label>Password</label>
-      <input id="password" type="password" placeholder="Create a password" autocomplete="new-password"/>
-
-      <label>Confirm password</label>
-      <input id="password2" type="password" placeholder="Repeat password" autocomplete="new-password"/>
+      <input id="password" type="password" placeholder="Choose a strong password"/>
 
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
         <button id="btn">Register</button>
-        <button class="secondary" type="button" onclick="window.location.href='/login.html'">Back to login</button>
       </div>
 
       <div id="msg" class="toast"></div>
@@ -61,32 +36,18 @@
     document.getElementById("btn").onclick = async () => {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-      const password2 = document.getElementById("password2").value.trim();
       const msg = document.getElementById("msg");
-
-      if(!email || !password){
-        msg.textContent = "Please enter email and password.";
-        return;
-      }
-      if(password.length < 6){
-        msg.textContent = "Password should be at least 6 characters.";
-        return;
-      }
-      if(password !== password2){
-        msg.textContent = "Passwords do not match.";
-        return;
-      }
-
       msg.textContent = "Creating account...";
 
       try{
         const data = await api("/auth/register","POST",{email,password});
 
-        // ✅ Store both correctly
-        setAuthFromResponse(data);
+        // store JWT + api_key separately
+        setAccessToken(data.access_token);
+        setApiKey(data.api_key);
 
         msg.textContent = "Account created. Redirecting...";
-        setTimeout(()=>window.location.href="/dashboard.html",600);
+        setTimeout(()=>window.location.href="/dashboard.html",700);
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
