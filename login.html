@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>676Trades - Login</title>
   <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .notice{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(79,124,255,0.10);
+      border-radius:14px;
+      padding:12px 14px;
+      margin-bottom:12px;
+      font-size:13px;
+      opacity:.92;
+      display:none;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -15,17 +27,19 @@
 
     <div class="card">
       <h1>Login</h1>
-      <div class="small">Login returns your API key (for MT5) and signs you in (JWT).</div>
+      <div class="small">Sign in to access your dashboard and settings.</div>
+
+      <div id="notice" class="notice"></div>
 
       <label>Email</label>
-      <input id="email" type="email" placeholder="you@example.com"/>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
 
       <label>Password</label>
-      <input id="password" type="password" placeholder="Your password"/>
+      <input id="password" type="password" placeholder="Your password" autocomplete="current-password"/>
 
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
         <button id="btn">Login</button>
-        <button id="forgotBtn" class="secondary">Forgot password?</button>
+        <button id="forgotBtn" class="secondary" type="button">Forgot password?</button>
       </div>
 
       <div id="msg" class="toast"></div>
@@ -36,11 +50,11 @@
         <div class="small">Enter your email and we’ll send a reset link (if the account exists).</div>
 
         <label style="margin-top:10px;">Email</label>
-        <input id="forgotEmail" type="email" placeholder="you@example.com"/>
+        <input id="forgotEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
 
         <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-          <button id="sendResetBtn">Send reset email</button>
-          <button id="cancelForgotBtn" class="secondary">Cancel</button>
+          <button id="sendResetBtn" type="button">Send reset email</button>
+          <button id="cancelForgotBtn" class="secondary" type="button">Cancel</button>
         </div>
 
         <div id="forgotMsg" class="toast"></div>
@@ -50,14 +64,24 @@
 
   <script src="app.js"></script>
   <script>
-    // Enter key support
-    function onEnter(el, fn){
-      el.addEventListener("keydown", (e)=>{
-        if(e.key === "Enter") fn();
-      });
-    }
+    // Optional message banner
+    (function(){
+      const m = readMsgParam();
+      const notice = document.getElementById("notice");
+      if(!m) return;
 
-    async function doLogin(){
+      const map = {
+        expired: "Your session expired. Please login again.",
+        login: "Please login to continue.",
+        loggedout: "You’ve been logged out."
+      };
+      if(map[m]){
+        notice.textContent = map[m];
+        notice.style.display = "block";
+      }
+    })();
+
+    document.getElementById("btn").onclick = async () => {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const msg = document.getElementById("msg");
@@ -66,29 +90,22 @@
       try{
         const data = await api("/auth/login","POST",{email,password});
 
-        // NEW: store JWT + api key separately
-        setAccessToken(data.access_token);
-        setApiKey(data.api_key);
+        // ✅ Store both correctly
+        setAuthFromResponse(data);
 
         msg.textContent = "Logged in. Redirecting...";
-        setTimeout(()=>window.location.href="/dashboard.html", 600);
+        setTimeout(()=>window.location.href="/dashboard.html",600);
       }catch(e){
         msg.textContent = "Error: " + e.message;
       }
-    }
+    };
 
-    document.getElementById("btn").onclick = doLogin;
-    onEnter(document.getElementById("email"), doLogin);
-    onEnter(document.getElementById("password"), doLogin);
-
-    // Forgot password UI
     const forgotBox = document.getElementById("forgotBox");
     const forgotMsg = document.getElementById("forgotMsg");
 
     document.getElementById("forgotBtn").onclick = () => {
       forgotBox.style.display = "block";
-      document.getElementById("forgotEmail").value =
-        document.getElementById("email").value.trim();
+      document.getElementById("forgotEmail").value = document.getElementById("email").value.trim();
       forgotMsg.textContent = "";
     };
 
@@ -102,8 +119,7 @@
       forgotMsg.textContent = "Sending...";
       try{
         await api("/auth/forgot-password","POST",{email});
-        forgotMsg.textContent =
-          "If the account exists, a reset email was sent. Check inbox/spam.";
+        forgotMsg.textContent = "If the account exists, a reset email was sent. Check inbox/spam.";
       }catch(e){
         forgotMsg.textContent = "Error: " + e.message;
       }
