@@ -106,7 +106,7 @@
     <!-- STATUS CARD -->
     <div class="card">
       <h1>Dashboard</h1>
-      <div class="small">Choose your market + lot size. Save, then Start.</div>
+      <div class="small">Beginner mode: pick market(s) + set lot size → Save → Start.</div>
       <hr/>
 
       <div class="kv">
@@ -135,7 +135,7 @@
       <div class="section-title">
         <h2>Trading Settings</h2>
         <div class="small">
-          <span class="info" data-tip="Keep it simple: pick a market, set lot size, then Save.">?</span>
+          <span class="info" data-tip="Keep it simple: select markets, set lot size, then Save.">?</span>
         </div>
       </div>
 
@@ -153,7 +153,8 @@
           <input id="pairs" placeholder="XAUUSD,EURUSD,GBPUSD,USDJPY" style="margin-top:10px;" />
 
           <div class="hint">
-            We currently support <b>Gold (XAUUSD)</b> and major FX pairs. Crypto & indices are temporarily locked while dedicated strategies are developed.
+            Supported: <b>Gold (XAUUSD)</b> + major FX pairs.
+            <b>Crypto & indices are locked for now</b> while dedicated strategies are developed.
           </div>
         </div>
 
@@ -163,7 +164,7 @@
             <span class="info" data-tip="Lot size controls trade size. If you’re new, start small (example: 0.01).">?</span>
           </label>
           <input id="lot" type="number" step="0.01" value="0.01"/>
-          <div class="hint">Beginner suggestion: start with <b>0.01</b> and increase only when you understand risk.</div>
+          <div class="hint">Beginner suggestion: start with <b>0.01</b>.</div>
         </div>
       </div>
 
@@ -171,25 +172,25 @@
       <details class="adv">
         <summary>
           Advanced (optional)
-          <span class="info" data-tip="Only adjust these if you understand what they do. Defaults are fine for beginners.">?</span>
+          <span class="info" data-tip="Defaults are fine for beginners. Only change if you understand risk settings.">?</span>
         </summary>
 
         <div style="margin-top:10px;" class="row">
           <div>
             <label>
-              SL Mode
-              <span class="info" data-tip="Stop Loss style. Dynamic uses candle patterns. Fixed uses a set distance.">?</span>
+              Stop Loss (SL) style
+              <span class="info" data-tip="Dynamic uses candle-pattern rules. Fixed uses a set distance.">?</span>
             </label>
             <select id="sl_mode">
-              <option value="dynamic">Dynamic (pattern-based)</option>
+              <option value="dynamic">Dynamic</option>
               <option value="fixed">Fixed</option>
             </select>
           </div>
 
           <div>
             <label>
-              TP Mode
-              <span class="info" data-tip="Take Profit style. RR means profit is a multiple of risk.">?</span>
+              Take Profit (TP) style
+              <span class="info" data-tip="RR targets profit as a multiple of the risk.">?</span>
             </label>
             <select id="tp_mode">
               <option value="rr">Risk / Reward (RR)</option>
@@ -273,9 +274,10 @@
     const riskCheck = document.getElementById("riskCheck");
     const riskHint = document.getElementById("riskHint");
 
-    function requireLogin(){
-      if(!getToken()){
-        window.location.href="/login.html";
+    function requireLoginSafe(){
+      // ✅ use access token explicitly (prevents mixing with API key)
+      if(!getAccessToken()){
+        window.location.href="/login.html?m=login";
         return false;
       }
       return true;
@@ -293,11 +295,6 @@
     }
 
     riskCheck.addEventListener("change", updateStartGate);
-
-    function copyKey(){
-      navigator.clipboard.writeText(getApiKey() || "");
-      msg2.textContent = "API key copied.";
-    }
 
     function pickPairs(s){
       return (s.pairs || s.pair || "XAUUSD");
@@ -341,7 +338,7 @@
 
       lastSeen.textContent = s.last_seen_at ? new Date(s.last_seen_at).toLocaleString() : "-";
 
-      // sync buttons UI
+      // sync buttons UI (safe)
       syncPairButtonsFromInput();
     }
 
@@ -414,7 +411,7 @@
     document.getElementById("copyKeyBtn").onclick = async ()=>{
       const key = getApiKey() || "";
       if(!key){
-        msg2.textContent = "No API key found yet. Login again if needed.";
+        msg2.textContent = "No API key found yet. Please login again.";
         return;
       }
       await navigator.clipboard.writeText(key);
@@ -494,7 +491,7 @@
         wrap.appendChild(makeBtn(a,false));
       }
 
-      // locked
+      // locked header
       const sep = document.createElement("div");
       sep.className = "pair-sep";
       sep.textContent = "Locked markets (coming soon)";
@@ -506,8 +503,12 @@
     }
 
     function syncPairButtonsFromInput(){
+      // safe even if buttons not built yet
+      const nodes = document.querySelectorAll(".pair-btn");
+      if(!nodes || nodes.length === 0) return;
+
       const cur = new Set(parsePairsInput());
-      document.querySelectorAll(".pair-btn").forEach(btn=>{
+      nodes.forEach(btn=>{
         const sym = btn.getAttribute("data-sym");
         if(!sym) return;
         if(btn.classList.contains("locked")) return;
@@ -517,7 +518,7 @@
     }
 
     // init
-    if(requireLogin()){
+    if(requireLoginSafe()){
       buildPairButtons();
       updateStartGate();
       refresh();
