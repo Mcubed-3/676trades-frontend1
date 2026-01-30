@@ -1,93 +1,92 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>676Trades - Risk Disclosure</title>
+  <title>676trades.org — Contact</title>
+  <meta name="description" content="Contact support for 676trades.org." />
   <link rel="stylesheet" href="styles.css"/>
-  <style>
-    .legal h1,.legal h2,.legal h3{margin:14px 0 8px}
-    .legal p,.legal li{line-height:1.6;opacity:.92}
-    .legal .muted{opacity:.75;font-size:13px}
-    .legal a{color:inherit}
-    .callout{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
-  </style>
 </head>
+
 <body>
-  <div class="container legal">
+  <div class="container">
     <div class="nav">
-      <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <a href="/dashboard.html">Dashboard</a>
-        <a href="/billing.html">Billing</a>
+      <div>
+        <b>676trades.org</b>
+        <div style="opacity:.75;font-size:12px;margin-top:2px;">Christ-centered marriage community</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/index.html">Home</a>
+        <a href="/community-guidelines.html">Guidelines</a>
         <a href="/terms.html">Terms</a>
         <a href="/privacy.html">Privacy</a>
+        <a href="/login.html">Sign in</a>
       </div>
     </div>
 
     <div class="card">
-      <h1>Risk Disclosure</h1>
-      <div class="muted">Last updated: <span id="lastUpdated"></span></div>
-      <hr/>
-
-      <div class="callout">
-        <b>Trading risk warning:</b>
-        Trading (including forex, CFDs, metals such as XAUUSD, crypto, and leveraged products) involves substantial risk
-        and may not be suitable for all investors. You can lose some or all of your capital.
+      <h1>Contact</h1>
+      <div class="small">
+        Need help, want to report an issue, or have a question about the community?
+        Reach out and we’ll respond as soon as we can.
       </div>
 
-      <h2>1) No guarantees</h2>
-      <p>
-        676Trades does not guarantee profits or performance. Any examples, backtests, signals, settings, or results shown
-        are not guarantees of future results.
-      </p>
-
-      <h2>2) Not financial advice</h2>
-      <p>
-        The Service is a tool for automation and configuration. Nothing on the site should be considered investment advice,
-        financial advice, legal advice, or tax advice. You are solely responsible for your trading decisions.
-      </p>
-
-      <h2>3) Market and execution risks</h2>
-      <ul>
-        <li><b>Volatility:</b> Prices can move quickly and unpredictably.</li>
-        <li><b>Slippage:</b> Your broker may fill orders at a different price than expected.</li>
-        <li><b>Spreads/fees:</b> Costs can widen during news events or low liquidity.</li>
-        <li><b>Leverage:</b> Leverage magnifies both gains and losses.</li>
-      </ul>
-
-      <h2>4) Technical risks</h2>
-      <ul>
-        <li>Internet outages, VPS downtime, MetaTrader issues, broker outages, or API failures may occur.</li>
-        <li>Settings may not apply instantly; the EA typically updates on its next poll/heartbeat.</li>
-        <li>Unexpected software bugs can occur; always monitor your account.</li>
-      </ul>
-
-      <h2>5) User responsibility</h2>
-      <p>
-        You are responsible for:
-      </p>
-      <ul>
-        <li>Choosing your broker and ensuring your account is suitable.</li>
-        <li>Understanding the strategy settings and risks.</li>
-        <li>Monitoring performance and disabling trading if needed.</li>
-        <li>Complying with your local regulations and broker terms.</li>
-      </ul>
-
-      <h2>6) Contact</h2>
-      <p>
-        Questions? Contact <b>676Trades</b> at <code>support@676trades.org</code>.
-      </p>
-
       <hr/>
-      <div class="muted">
-        Also read: <a href="/terms.html">Terms of Service</a> • <a href="/privacy.html">Privacy Policy</a>
+
+      <div class="row">
+        <div class="miniCard">
+          <h3>Support email</h3>
+          <div class="small" style="margin-top:6px;">
+            <a href="mailto:support@676trades.org"><b>support@676trades.org</b></a>
+          </div>
+          <div class="small" style="margin-top:10px; opacity:.85;">
+            Best for: account issues, login problems, bug reports, guideline concerns.
+          </div>
+        </div>
+
+        <div class="miniCard">
+          <h3>Reporting & safety</h3>
+          <div class="small" style="margin-top:6px;">
+            If you’re reporting harassment or unsafe behavior, include:
+            <ul class="list">
+              <li>the user’s email/username (if shown)</li>
+              <li>what happened</li>
+              <li>date/time</li>
+              <li>screenshots (if possible)</li>
+            </ul>
+          </div>
+          <div class="small" style="margin-top:10px; opacity:.85;">
+            We prioritize safety reports.
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warn" style="margin-top:12px;">
+        <b>Emergency note:</b> If you are in immediate danger, contact your local emergency services.
+        This platform is not an emergency service.
       </div>
     </div>
   </div>
 
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>© <span id="yr"></span> 676trades.org</span>
+      <span class="dot">·</span>
+      <a href="/terms.html">Terms</a>
+      <span class="dot">·</span>
+      <a href="/privacy.html">Privacy</a>
+      <span class="dot">·</span>
+      <a href="/community-guidelines.html">Guidelines</a>
+      <span class="dot">·</span>
+      <a href="mailto:support@676trades.org">Support</a>
+    </div>
+  </footer>
+
   <script>
-    document.getElementById("lastUpdated").textContent = new Date().toISOString().slice(0,10);
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
   </script>
 </body>
 </html>
