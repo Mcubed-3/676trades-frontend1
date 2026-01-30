@@ -1,12 +1,403 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>676Trades</title>
-  <script>
-    window.location.href = "/login.html";
-  </script>
+  <title>676trades.org — Christ-Centered Marriage Community</title>
+  <meta name="description" content="A Christ-centered community for Caribbean Christian singles pursuing marriage with intention, respect, and integrity." />
+  <link rel="stylesheet" href="styles.css"/>
+
+  <style>
+    /* Page-only styles to avoid breaking your existing dashboard CSS */
+    .heroWrap{
+      margin-top:18px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: radial-gradient(900px 500px at 20% 0%, rgba(125,211,252,.15), transparent 60%),
+                  radial-gradient(900px 500px at 90% 20%, rgba(167,243,208,.10), transparent 55%),
+                  rgba(11,21,40,0.70);
+      border-radius:18px;
+      padding:22px;
+    }
+    .kicker{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+    }
+    .heroTitle{
+      margin:12px 0 10px 0;
+      font-size: clamp(30px, 4vw, 50px);
+      line-height:1.05;
+      letter-spacing:-.6px;
+    }
+    .heroLead{
+      max-width: 70ch;
+      opacity:.85;
+      font-size: 16px;
+      line-height: 1.55;
+      margin: 0 0 14px 0;
+    }
+    .ctaRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .btnPrimary{
+      border:1px solid rgba(125,211,252,.35);
+      background: rgba(125,211,252,.10);
+    }
+    .btnPrimary:hover{ background: rgba(125,211,252,.14); }
+    .heroNote{
+      margin-top:14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(167,243,208,.20);
+      background: rgba(167,243,208,.06);
+      opacity:.95;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 900px){ .grid3{ grid-template-columns: 1fr; } }
+
+    .miniCard{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(11,21,40,0.55);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .miniCard h3{ margin:0 0 6px 0; font-size:16px; }
+    .miniCard p{ margin:0; opacity:.82; font-size: 13px; line-height: 1.45; }
+
+    .section{
+      margin-top: 16px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(11,21,40,0.50);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .sectionTitle{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .sectionTitle h2{ margin:0; font-size:20px; }
+    .sectionTitle .small{ opacity:.75; font-size: 12px; }
+
+    .pillRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .pill{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      opacity: .95;
+    }
+
+    .split2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 900px){ .split2{ grid-template-columns: 1fr; } }
+
+    details.faq{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(11,21,40,0.55);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+    details.faq + details.faq{ margin-top: 10px; }
+    details.faq summary{
+      cursor:pointer;
+      user-select:none;
+      font-weight: 900;
+      list-style:none;
+    }
+    details.faq summary::-webkit-details-marker{ display:none; }
+    .faqP{ margin:8px 0 0 0; opacity:.82; font-size: 13px; line-height: 1.45; }
+
+    /* Optional: make your nav feel more "platform" than "trading" */
+    .brandSub{ opacity:.75; font-size:12px; margin-top:2px; }
+  </style>
 </head>
-<body></body>
+
+<body>
+  <div class="container">
+
+    <!-- NAV (keeps your existing structure) -->
+    <div class="nav">
+      <div>
+        <b>676trades.org</b>
+        <div class="brandSub">Christ-centered marriage community</div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="#about">About</a>
+        <a href="#values">Values</a>
+        <a href="#groups">Groups</a>
+        <a href="#safety">Safety</a>
+        <a href="#faq">FAQ</a>
+        <a href="/login.html">Sign in</a>
+        <a href="/register.html"><b>Create account</b></a>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="heroWrap">
+      <div class="kicker">Community first • Courtship with clarity • Covenant as the goal</div>
+      <h1 class="heroTitle">A calm place to belong.<br/>A faithful path toward marriage.</h1>
+      <p class="heroLead">
+        This platform is for Caribbean and diaspora Christian singles who desire marriage and want connection without intimidation,
+        performance, or pressure.
+      </p>
+
+      <div class="ctaRow">
+        <a class="btn btnPrimary" href="/register.html">Create an account</a>
+        <a class="btn secondary" href="/login.html">Sign in</a>
+        <a class="btn secondary" href="#about">Learn more</a>
+      </div>
+
+      <div class="heroNote">
+        <b>Not swipe culture.</b> Not status chasing. Not pressure.<br/>
+        Just faith-centered community, respectful conversation, and intentional courtship.
+      </div>
+    </div>
+
+    <!-- QUICK DIFFERENTIATORS -->
+    <div class="section" id="about">
+      <div class="sectionTitle">
+        <h2>Why this exists</h2>
+        <div class="small">A gentle alternative to intimidating dating culture</div>
+      </div>
+
+      <div class="split2">
+        <div class="miniCard">
+          <h3>Many dating apps feel exhausting</h3>
+          <p>
+            Too much performance. Too much comparison. Too much pressure to “sell yourself”.
+            Sincere believers can feel overlooked or out of place.
+          </p>
+          <div class="pillRow">
+            <span class="pill">No pressure</span>
+            <span class="pill">No performance</span>
+            <span class="pill">No hookup culture</span>
+          </div>
+        </div>
+
+        <div class="miniCard">
+          <h3>This is built for authenticity</h3>
+          <p>
+            Faith is foundational here. Character matters. Gentle personalities matter.
+            You can connect through community first — then private conversation when ready.
+          </p>
+          <div class="pillRow">
+            <span class="pill">Christ-centered</span>
+            <span class="pill">Marriage-minded</span>
+            <span class="pill">Respectful</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VALUES -->
+    <div class="section" id="values">
+      <div class="sectionTitle">
+        <h2>Our values</h2>
+        <div class="small">Non-negotiables that protect the community</div>
+      </div>
+
+      <div class="grid3">
+        <div class="miniCard">
+          <h3>Christ at the center</h3>
+          <p>Faith is not branding. It guides conduct, communication, and intention.</p>
+        </div>
+        <div class="miniCard">
+          <h3>Authenticity over performance</h3>
+          <p>Be honest, not impressive. Character matters more than charisma.</p>
+        </div>
+        <div class="miniCard">
+          <h3>Gentleness & respect</h3>
+          <p>No pressure. No manipulation. Boundaries are honored.</p>
+        </div>
+        <div class="miniCard">
+          <h3>Intentional courtship</h3>
+          <p>Marriage-focused connection — not casual dating or time-wasting.</p>
+        </div>
+        <div class="miniCard">
+          <h3>Safety & dignity</h3>
+          <p>Harassment, sexual content, and coercion are not tolerated.</p>
+        </div>
+        <div class="miniCard">
+          <h3>Growth before romance</h3>
+          <p>Healthy marriages are built by people willing to reflect, learn, and grow.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="section" id="groups">
+      <div class="sectionTitle">
+        <h2>Community & groups</h2>
+        <div class="small">Socialize naturally before private chats</div>
+      </div>
+
+      <div class="split2">
+        <div class="miniCard">
+          <h3>Join groups that fit you</h3>
+          <p>Groups make connection less intimidating and more natural.</p>
+          <ul style="margin:10px 0 0 18px; opacity:.85; font-size:13px; line-height:1.45;">
+            <li>Christian Singles (Jamaica)</li>
+            <li>Caribbean Diaspora (UK/Canada/US)</li>
+            <li>Prayer & Discernment</li>
+            <li>Preparing for Marriage</li>
+            <li>Purpose, Work & Calling</li>
+          </ul>
+        </div>
+
+        <div class="miniCard">
+          <h3>Weekly discussion topics</h3>
+          <p>
+            The platform can post weekly discussion prompts to help people engage meaningfully and build confidence.
+          </p>
+          <div class="pillRow">
+            <span class="pill">Faith</span>
+            <span class="pill">Communication</span>
+            <span class="pill">Family</span>
+            <span class="pill">Purpose</span>
+          </div>
+          <div style="margin-top:10px; opacity:.82; font-size:13px; line-height:1.45;">
+            Examples:
+            <ul style="margin:8px 0 0 18px;">
+              <li>“What does a Christ-centered marriage mean to you?”</li>
+              <li>“How do you handle conflict in a healthy way?”</li>
+              <li>“What values do you want your home to be built on?”</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAFETY -->
+    <div class="section" id="safety">
+      <div class="sectionTitle">
+        <h2>Safety & community standards</h2>
+        <div class="small">A respectful environment is part of the mission</div>
+      </div>
+
+      <div class="split2">
+        <div class="miniCard">
+          <h3>Not allowed</h3>
+          <ul style="margin:10px 0 0 18px; opacity:.85; font-size:13px; line-height:1.45;">
+            <li>Sexual content, pressure, or coercion</li>
+            <li>Harassment, insults, manipulation, stalking</li>
+            <li>Scams, fake identities, exploitative behavior</li>
+            <li>Humiliation or disrespect</li>
+          </ul>
+        </div>
+        <div class="miniCard">
+          <h3>What we protect</h3>
+          <ul style="margin:10px 0 0 18px; opacity:.85; font-size:13px; line-height:1.45;">
+            <li>Dignity and respectful conversation</li>
+            <li>Healthy boundaries and consent</li>
+            <li>Women’s safety and peace of mind</li>
+            <li>A marriage-focused environment</li>
+          </ul>
+
+          <div class="ctaRow" style="margin-top:12px;">
+            <a class="btn btnPrimary" href="/community-guidelines.html">Read guidelines</a>
+            <a class="btn secondary" href="/register.html">Join</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="section" id="faq">
+      <div class="sectionTitle">
+        <h2>FAQ</h2>
+        <div class="small">Quick answers</div>
+      </div>
+
+      <details class="faq">
+        <summary>Is this only for Jamaicans?</summary>
+        <p class="faqP">
+          It’s Caribbean-centered and welcomes the Caribbean diaspora too. Shared culture + shared faith are the focus.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Is this casual dating?</summary>
+        <p class="faqP">
+          No. This platform is marriage-focused. Courtship is approached with clarity, respect, and intention.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>Do I have to be “perfect”?</summary>
+        <p class="faqP">
+          No. Sincerity matters. This is a space for growth and maturity — not performance.
+        </p>
+      </details>
+
+      <details class="faq">
+        <summary>How do conversation prompts work?</summary>
+        <p class="faqP">
+          Prompts are optional and meant to reduce awkwardness and encourage meaningful discussion. You can ignore them any time.
+        </p>
+      </details>
+    </div>
+
+    <!-- FINAL CTA -->
+    <div class="section" style="text-align:center;">
+      <div class="kicker" style="justify-content:center;">Welcome home</div>
+      <h2 style="margin:10px 0 6px 0;">Join with intention. Connect with peace.</h2>
+      <p style="max-width:70ch; margin:0 auto 12px auto; opacity:.85; font-size:13px; line-height:1.45;">
+        If you’ve ever felt out of place on modern dating sites, this space was built for calm connection — guided by faith and respect.
+      </p>
+      <div class="ctaRow" style="justify-content:center;">
+        <a class="btn btnPrimary" href="/register.html">Create an account</a>
+        <a class="btn secondary" href="/login.html">Sign in</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>© <span id="yr"></span> 676trades.org</span>
+      <span class="dot">·</span>
+      <a href="/terms.html">Terms</a>
+      <span class="dot">·</span>
+      <a href="/privacy.html">Privacy</a>
+      <span class="dot">·</span>
+      <a href="/community-guidelines.html">Guidelines</a>
+      <span class="dot">·</span>
+      <a href="mailto:support@676trades.org">Support</a>
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      var el = document.getElementById("yr");
+      if(el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
 </html>
