@@ -1,30 +1,74 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>676Trades - Register</title>
+  <title>676trades.org — Create Account</title>
+  <meta name="description" content="Create your account to join a Christ-centered marriage community for Caribbean Christian singles." />
   <link rel="stylesheet" href="styles.css"/>
+
+  <style>
+    .checkline{
+      display:flex; gap:10px; align-items:flex-start;
+      user-select:none;
+      margin-top: 12px;
+    }
+    .checkline input{ width:18px; height:18px; margin-top:2px; }
+    .helperlinks{ margin-top:10px; font-size:13px; opacity:.9; }
+    .helperlinks a{ color: var(--text); text-decoration: underline; }
+    .dangertext{ color:#ffb4b4; font-size:12px; opacity:0.95; margin-top:8px; display:none; }
+    .btnRow{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+  </style>
 </head>
+
 <body>
   <div class="container">
     <div class="nav">
-      <div><b>676Trades</b></div>
-      <div><a href="/login.html">Login</a></div>
+      <div>
+        <b>676trades.org</b>
+        <div style="opacity:.75;font-size:12px;margin-top:2px;">Christ-centered marriage community</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/index.html">Home</a>
+        <a href="/community-guidelines.html">Guidelines</a>
+        <a href="/login.html">Sign in</a>
+      </div>
     </div>
 
     <div class="card">
-      <h1>Create account</h1>
-      <div class="small">Create your account to access the dashboard and your MT5 EA key.</div>
+      <h1>Create your account</h1>
+      <div class="small">
+        Join a calm, Christ-centered community for Caribbean Christian singles who desire marriage and respectful connection.
+      </div>
+
+      <hr/>
 
       <label>Email</label>
-      <input id="email" type="email" placeholder="you@example.com"/>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
 
       <label>Password</label>
-      <input id="password" type="password" placeholder="Choose a strong password"/>
+      <input id="password" type="password" placeholder="Create a strong password" autocomplete="new-password"/>
 
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="btn">Register</button>
+      <label style="margin-top:12px;">Confirm Password</label>
+      <input id="password2" type="password" placeholder="Re-enter your password" autocomplete="new-password"/>
+
+      <label class="checkline">
+        <input id="agree" type="checkbox"/>
+        <span class="small" style="margin:0;">
+          I agree to follow the <a href="/community-guidelines.html"><b>Community Guidelines</b></a>
+          and accept the <a href="/terms.html"><b>Terms</b></a> and <a href="/privacy.html"><b>Privacy Policy</b></a>.
+        </span>
+      </label>
+
+      <div id="agreeHint" class="dangertext">Please tick the checkbox to continue.</div>
+
+      <div class="btnRow">
+        <button id="btn">Create account</button>
+        <a class="btn btnGhost" href="/login.html">Already have an account?</a>
+      </div>
+
+      <div class="helperlinks">
+        By joining, you agree to keep communication respectful, avoid sexual content, and honor boundaries.
       </div>
 
       <div id="msg" class="toast"></div>
@@ -33,16 +77,43 @@
 
   <script src="app.js"></script>
   <script>
+    const msg = document.getElementById("msg");
     document.getElementById("btn").onclick = async () => {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-      const msg = document.getElementById("msg");
+      const password2 = document.getElementById("password2").value.trim();
+      const agree = document.getElementById("agree").checked;
+      const agreeHint = document.getElementById("agreeHint");
+
+      agreeHint.style.display = "none";
+
+      if(!agree){
+        agreeHint.style.display = "block";
+        msg.textContent = "Please accept the guidelines and policies first.";
+        return;
+      }
+
+      if(!email || !password){
+        msg.textContent = "Please enter your email and password.";
+        return;
+      }
+
+      if(password.length < 8){
+        msg.textContent = "Password should be at least 8 characters.";
+        return;
+      }
+
+      if(password !== password2){
+        msg.textContent = "Passwords do not match.";
+        return;
+      }
+
       msg.textContent = "Creating account...";
 
       try{
         const data = await api("/auth/register","POST",{email,password});
 
-        // store JWT + api_key separately
+        // store JWT + api_key separately (kept as-is for your backend)
         setAccessToken(data.access_token);
         setApiKey(data.api_key);
 
