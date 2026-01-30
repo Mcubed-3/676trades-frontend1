@@ -1,72 +1,97 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>676Trades - Dashboard</title>
+  <title>Caribbean Covenant — Dashboard</title>
+  <meta name="description" content="Community dashboard for Caribbean Covenant." />
   <link rel="stylesheet" href="styles.css"/>
 
   <style>
+    /* Page-only additions */
     .badge.live { background:#16a34a; color:white; }
     .badge.dead { background:#f59e0b; color:black; }
-    .smallmuted { opacity:0.75; font-size:12px; margin-top:6px; }
 
-    .banner{
+    .heroBanner{
       border:1px solid rgba(255,255,255,0.10);
-      background: rgba(255,180,0,0.08);
-      border-radius:14px;
-      padding:14px 14px;
-      margin-bottom:14px;
+      background: radial-gradient(900px 500px at 20% 0%, rgba(79,124,255,.15), transparent 60%),
+                  radial-gradient(900px 500px at 90% 20%, rgba(34,197,94,.10), transparent 55%),
+                  rgba(11,21,40,0.62);
+      border-radius:18px;
+      padding:16px 16px;
+      margin-top:18px;
     }
-    .banner h3{ margin:0 0 6px 0; font-size:16px; }
-    .banner .muted{ opacity:0.85; font-size:13px; line-height:1.35; }
-    .banner .rowline{
-      margin-top:10px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .checkline{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      user-select:none;
-    }
-    .checkline input{ width:18px; height:18px; }
-    .dangertext{ color:#ffb4b4; font-size:12px; opacity:0.9; }
-    .btn-disabled{
-      opacity:0.55;
-      pointer-events:none;
-      filter: grayscale(25%);
+    .heroBanner h1{ margin:0 0 6px 0; font-size: 26px; letter-spacing:-.3px; }
+    .heroBanner .sub{ opacity:.85; font-size:13px; line-height:1.4; max-width: 85ch; }
+
+    .pillRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .pill{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      opacity: .95;
     }
 
-    /* Beginner UI blocks */
-    .section-title{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin:0 0 10px 0;
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
-    .section-title h2{ margin:0; }
-    details.adv{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:14px;
+    @media (max-width: 900px){ .grid3{ grid-template-columns: 1fr; } }
+
+    .miniCard{
+      border:1px solid var(--border);
       background:#0b1528;
-      padding:10px 12px;
+      border-radius:16px;
+      padding:14px;
     }
-    details.adv summary{
-      cursor:pointer;
-      user-select:none;
-      font-weight:800;
-      list-style:none;
+    .miniCard h3{ margin:0 0 6px 0; font-size:16px; }
+    .miniCard p{ margin:0; opacity:.85; font-size: 13px; line-height: 1.45; }
+
+    .sectionTitle{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+      margin-bottom:10px;
     }
-    details.adv summary::-webkit-details-marker{display:none;}
-    .hint{
-      font-size:12px;
-      opacity:.82;
-      line-height:1.35;
-      margin-top:6px;
+    .sectionTitle h2{ margin:0; }
+    .sectionTitle .small{ opacity:.75; font-size:12px; }
+
+    .btnRow{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
+    a.btnLike{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);color:var(--text);text-decoration:none;font-weight:900;
+    }
+    a.btnLike:hover{ background: rgba(255,255,255,0.06); }
+    a.btnLike.primary{
+      background: rgba(79,124,255,0.14);
+      border-color: rgba(79,124,255,0.35);
+    }
+    a.btnLike.primary:hover{
+      background: rgba(79,124,255,0.18);
+      border-color: rgba(79,124,255,0.55);
+    }
+
+    .promptBox{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .promptBox .label{ font-size:12px; opacity:.75; font-weight:900; text-transform:uppercase; letter-spacing:.4px; }
+    .promptBox .prompt{ margin-top:8px; font-size:14px; line-height:1.5; font-weight:800; }
+    .promptBox .hint{ margin-top:8px; opacity:.8; font-size:12px; line-height:1.35; }
+
+    .callout{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(245,158,11,0.07);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.45;
     }
   </style>
 </head>
@@ -74,187 +99,204 @@
 <body>
   <div class="container">
 
-    <!-- RISK / COMPLIANCE BANNER -->
-    <div class="banner">
-      <h3>Risk disclaimer</h3>
-      <div class="muted">
-        Automated trading involves risk and can result in losses. 676Trades does not provide financial advice.
-        Use at your own risk. Past performance is not indicative of future results.
-      </div>
-
-      <div class="rowline">
-        <label class="checkline">
-          <input id="riskCheck" type="checkbox"/>
-          <span class="muted"><b>I understand the risk</b> and want to enable automated trading.</span>
-        </label>
-        <div id="riskHint" class="dangertext" style="display:none;">
-          Please tick the checkbox to enable “Start Algo”.
-        </div>
-      </div>
-    </div>
-
+    <!-- NAV -->
     <div class="nav">
-      <div><b>676Trades</b></div>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <a href="/setup2.html">Setup</a>
-        <a href="/account2.html">Account</a>
-        <a href="/billing.html">Billing</a>
+      <div>
+        <b>Caribbean Covenant</b>
+        <div style="opacity:.75;font-size:12px;margin-top:2px;">Christ-centered marriage community</div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/index.html">Home</a>
+        <a href="/community-guidelines.html">Guidelines</a>
+        <a href="/account2.html">Profile</a>
+        <a href="/contact.html">Contact</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
 
-    <!-- STATUS CARD -->
-    <div class="card">
-      <h1>Dashboard</h1>
-      <div class="small">Beginner mode: pick market(s) + set lot size → Save → Start.</div>
-      <hr/>
-
-      <div class="kv">
-        <div><b>Status</b><span id="statusBadge" class="badge off">OFF</span></div>
-        <div><b>Markets</b><span id="pairsText">-</span></div>
-        <div><b>Lot size</b><span id="lotText">-</span></div>
-
-        <div><b>EA</b>
-          <span id="eaBadge" class="badge dead">Offline ⚠️</span>
-        </div>
-        <div><b>Last seen</b><span id="lastSeenText">-</span></div>
+    <!-- HERO -->
+    <div class="heroBanner">
+      <h1>Welcome back</h1>
+      <div class="sub">
+        Community first. Courtship with clarity. Covenant as the goal.<br/>
+        This is a calm space for Caribbean Christian singles who desire marriage — built on respect, safety, and faith-led connection.
       </div>
 
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="startBtn">Start Algo</button>
-        <button id="stopBtn" class="danger">Stop Algo</button>
-        <button id="refreshBtn" class="secondary">Refresh</button>
+      <div class="pillRow">
+        <span class="pill">Respect</span>
+        <span class="pill">Safety</span>
+        <span class="pill">Marriage-focused</span>
+        <span class="pill">Groups</span>
+        <span class="pill">Guided prompts</span>
       </div>
-
-      <div id="msg" class="toast"></div>
-      <div class="smallmuted">EA becomes “Connected” after a heartbeat within the last 5 minutes.</div>
     </div>
 
-    <!-- SIMPLE SETTINGS CARD (BEGINNER) -->
+    <!-- PROFILE + NEXT STEPS -->
     <div class="card">
-      <div class="section-title">
-        <h2>Trading Settings</h2>
-        <div class="small">
-          <span class="info" data-tip="Keep it simple: select markets, set lot size, then Save.">?</span>
+      <div class="sectionTitle">
+        <h2>Your next steps</h2>
+        <div class="small">Start small. No pressure.</div>
+      </div>
+
+      <div class="grid3">
+        <div class="miniCard">
+          <h3>1) Complete your profile</h3>
+          <p>
+            Add a photo (optional at first), a short faith statement, and what you’re looking for in a Christ-centered marriage.
+          </p>
+          <div class="btnRow">
+            <a class="btnLike primary" href="/account2.html">Go to Profile</a>
+          </div>
         </div>
+
+        <div class="miniCard">
+          <h3>2) Join a group</h3>
+          <p>
+            Groups remove intimidation. You can socialize naturally before private conversations.
+          </p>
+          <div class="btnRow">
+            <a class="btnLike" href="#groups">See groups</a>
+          </div>
+        </div>
+
+        <div class="miniCard">
+          <h3>3) Start with a prompt</h3>
+          <p>
+            If messaging feels awkward, use a conversation prompt to help you engage with depth and clarity.
+          </p>
+          <div class="btnRow">
+            <a class="btnLike" href="#prompts">Get a prompt</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <b>Gentle reminder:</b> This platform does not reward “flashy” lifestyles. You don’t need to impress.
+        Be sincere, be respectful, and move with intention.
+      </div>
+    </div>
+
+    <!-- GROUPS (STATIC PLACEHOLDER UI FOR NOW) -->
+    <div class="card" id="groups">
+      <div class="sectionTitle">
+        <h2>Groups</h2>
+        <div class="small">Community before coupling</div>
       </div>
 
       <div class="row">
         <div>
-          <label>
-            Choose markets
-            <span class="info" data-tip="Tap buttons to select. You can pick more than one.">?</span>
-          </label>
+          <label style="margin-top:0;">Suggested groups</label>
+          <div class="miniCard">
+            <h3>Christian Singles — Jamaica</h3>
+            <p>Faith-centered discussion for singles in Jamaica. Calm conversation, no pressure.</p>
+            <div class="btnRow">
+              <button class="secondary" disabled title="Coming soon">Join (coming soon)</button>
+            </div>
+          </div>
 
-          <!-- Button selector -->
-          <div id="pairButtons" class="pair-grid"></div>
-
-          <!-- Underlying input that gets saved -->
-          <input id="pairs" placeholder="XAUUSD,EURUSD,GBPUSD,USDJPY" style="margin-top:10px;" />
-
-          <div class="hint">
-            Supported: <b>Gold (XAUUSD)</b> + major FX pairs.
-            <b>Crypto & indices are locked for now</b> while dedicated strategies are developed.
+          <div class="miniCard" style="margin-top:12px;">
+            <h3>Caribbean Diaspora — UK / Canada / US</h3>
+            <p>For Caribbean Christians abroad who want shared culture and shared faith.</p>
+            <div class="btnRow">
+              <button class="secondary" disabled title="Coming soon">Join (coming soon)</button>
+            </div>
           </div>
         </div>
 
         <div>
-          <label>
-            Lot Size
-            <span class="info" data-tip="Lot size controls trade size. If you’re new, start small (example: 0.01).">?</span>
-          </label>
-          <input id="lot" type="number" step="0.01" value="0.01"/>
-          <div class="hint">Beginner suggestion: start with <b>0.01</b>.</div>
+          <label style="margin-top:0;">Growth & marriage prep</label>
+          <div class="miniCard">
+            <h3>Prayer & Discernment</h3>
+            <p>Discussion prompts focused on wisdom, peace, and discernment in relationships.</p>
+            <div class="btnRow">
+              <button class="secondary" disabled title="Coming soon">Join (coming soon)</button>
+            </div>
+          </div>
+
+          <div class="miniCard" style="margin-top:12px;">
+            <h3>Preparing for Marriage</h3>
+            <p>Conversations on communication, boundaries, family, finances, and purpose.</p>
+            <div class="btnRow">
+              <button class="secondary" disabled title="Coming soon">Join (coming soon)</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Advanced (collapsed by default) -->
-      <details class="adv">
-        <summary>
-          Advanced (optional)
-          <span class="info" data-tip="Defaults are fine for beginners. Only change if you understand risk settings.">?</span>
-        </summary>
+      <div class="small" style="margin-top:12px;">
+        Groups will be fully interactive once we wire the community features. For now, this dashboard sets the structure and tone.
+      </div>
+    </div>
 
-        <div style="margin-top:10px;" class="row">
-          <div>
-            <label>
-              Stop Loss (SL) style
-              <span class="info" data-tip="Dynamic uses candle-pattern rules. Fixed uses a set distance.">?</span>
-            </label>
-            <select id="sl_mode">
-              <option value="dynamic">Dynamic</option>
-              <option value="fixed">Fixed</option>
-            </select>
-          </div>
-
-          <div>
-            <label>
-              Take Profit (TP) style
-              <span class="info" data-tip="RR targets profit as a multiple of the risk.">?</span>
-            </label>
-            <select id="tp_mode">
-              <option value="rr">Risk / Reward (RR)</option>
-              <option value="pattern_mult">Pattern multiplier</option>
-              <option value="fixed">Fixed</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Minimum pips</label>
-            <input id="min_pips" type="number" value="50"/>
-          </div>
-          <div>
-            <label>SL buffer pips</label>
-            <input id="sl_buffer_pips" type="number" value="5"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>RR</label>
-            <input id="rr" type="number" step="0.1" value="1.0"/>
-          </div>
-          <div>
-            <label>Pattern TP Multiplier</label>
-            <input id="pattern_tp_mult" type="number" step="0.1" value="1.5"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Fixed SL pips</label>
-            <input id="fixed_sl_pips" type="number" value="50"/>
-          </div>
-          <div>
-            <label>Fixed TP pips</label>
-            <input id="fixed_tp_pips" type="number" value="50"/>
-          </div>
-        </div>
-      </details>
-
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="saveBtn">Save Settings</button>
-        <button id="copyKeyBtn" class="secondary">Copy API Key</button>
+    <!-- PROMPTS -->
+    <div class="card" id="prompts">
+      <div class="sectionTitle">
+        <h2>Conversation prompt</h2>
+        <div class="small">Optional — designed to reduce awkwardness</div>
       </div>
 
-      <div id="msg2" class="toast"></div>
+      <div class="promptBox">
+        <div class="label">Prompt of the moment</div>
+        <div id="promptText" class="prompt">Loading prompt…</div>
+        <div class="hint">
+          Use this in a group thread or private chat. If it doesn’t fit, tap “New prompt”.
+        </div>
+
+        <div class="btnRow">
+          <button id="newPromptBtn">New prompt</button>
+          <button id="copyPromptBtn" class="secondary">Copy</button>
+        </div>
+
+        <div id="promptMsg" class="toast"></div>
+      </div>
+    </div>
+
+    <!-- SAFETY -->
+    <div class="card">
+      <div class="sectionTitle">
+        <h2>Safety</h2>
+        <div class="small">Protecting peace is part of the mission</div>
+      </div>
+
+      <div class="row">
+        <div class="miniCard">
+          <h3>Boundaries are respected</h3>
+          <p>
+            No pressure, no coercion, no sexual content. If someone is not interested, accept it and move on respectfully.
+          </p>
+        </div>
+
+        <div class="miniCard">
+          <h3>Need help?</h3>
+          <p>
+            Read the guidelines or contact support if something feels unsafe.
+          </p>
+          <div class="btnRow">
+            <a class="btnLike" href="/community-guidelines.html">Read guidelines</a>
+            <a class="btnLike primary" href="/contact.html">Contact</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:12px;">
+        This platform is not an emergency service. If you are in immediate danger, contact local emergency services.
+      </div>
     </div>
 
   </div>
 
   <footer class="footer">
     <div class="footer-inner">
-      <span>© <span id="yr"></span> 676Trades</span>
+      <span>© <span id="yr"></span> Caribbean Covenant</span>
       <span class="dot">·</span>
       <a href="/terms.html">Terms</a>
       <span class="dot">·</span>
       <a href="/privacy.html">Privacy</a>
       <span class="dot">·</span>
-      <a href="/risk.html">Risk Disclosure</a>
+      <a href="/community-guidelines.html">Guidelines</a>
       <span class="dot">·</span>
-      <a href="mailto:support@676trades.org">Support</a>
+      <a href="/contact.html">Contact</a>
     </div>
   </footer>
 
@@ -263,266 +305,60 @@
       var el = document.getElementById("yr");
       if(el) el.textContent = new Date().getFullYear();
     })();
+
+    // Require login if your app.js provides getAccessToken()
+    (function requireLoginSafe(){
+      try{
+        if(typeof getAccessToken === "function"){
+          if(!getAccessToken()){
+            window.location.href="/login.html?m=login";
+          }
+        }
+      }catch(e){}
+    })();
+
+    // Local prompts (no backend required yet)
+    const PROMPTS = [
+      "What does a Christ-centered marriage mean to you in everyday life?",
+      "How do you like to handle conflict in a respectful and healthy way?",
+      "What values do you want your home to be built on?",
+      "How do you practice your faith throughout the week?",
+      "What does accountability look like to you in a relationship?",
+      "How do you balance purpose, work, and family in your future?",
+      "What boundaries help you date with peace and clarity?",
+      "What role should prayer play in courtship and decision-making?",
+      "What is something God has been teaching you recently?",
+      "How do you want to communicate during stressful seasons?"
+    ];
+
+    function pickRandomPrompt(){
+      return PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+    }
+
+    const promptText = document.getElementById("promptText");
+    const promptMsg = document.getElementById("promptMsg");
+
+    function setPrompt(){
+      const p = pickRandomPrompt();
+      promptText.textContent = p;
+      promptMsg.textContent = "";
+    }
+
+    document.getElementById("newPromptBtn").onclick = () => setPrompt();
+
+    document.getElementById("copyPromptBtn").onclick = async () => {
+      try{
+        await navigator.clipboard.writeText(promptText.textContent || "");
+        promptMsg.textContent = "Prompt copied.";
+      }catch(e){
+        promptMsg.textContent = "Could not copy. Please copy manually.";
+      }
+    };
+
+    // Init prompt
+    setPrompt();
   </script>
 
   <script src="app.js"></script>
-  <script>
-    const msg = document.getElementById("msg");
-    const msg2 = document.getElementById("msg2");
-
-    const startBtn = document.getElementById("startBtn");
-    const riskCheck = document.getElementById("riskCheck");
-    const riskHint = document.getElementById("riskHint");
-
-    function requireLoginSafe(){
-      // ✅ use access token explicitly (prevents mixing with API key)
-      if(!getAccessToken()){
-        window.location.href="/login.html?m=login";
-        return false;
-      }
-      return true;
-    }
-
-    function updateStartGate(){
-      const ok = !!riskCheck.checked;
-      if(ok){
-        startBtn.classList.remove("btn-disabled");
-        riskHint.style.display = "none";
-      }else{
-        startBtn.classList.add("btn-disabled");
-      }
-      return ok;
-    }
-
-    riskCheck.addEventListener("change", updateStartGate);
-
-    function pickPairs(s){
-      return (s.pairs || s.pair || "XAUUSD");
-    }
-
-    function fillForm(s){
-      const pairsVal = pickPairs(s);
-
-      document.getElementById("pairs").value = pairsVal;
-      document.getElementById("lot").value = (s.lot_size ?? 0.01);
-
-      document.getElementById("sl_mode").value = (s.sl_mode || "dynamic");
-      document.getElementById("tp_mode").value = (s.tp_mode || "rr");
-
-      document.getElementById("min_pips").value = (s.min_pips ?? 50);
-      document.getElementById("sl_buffer_pips").value = (s.sl_buffer_pips ?? 5);
-
-      document.getElementById("rr").value = (s.rr ?? 1.0);
-      document.getElementById("pattern_tp_mult").value = (s.pattern_tp_mult ?? 1.5);
-
-      document.getElementById("fixed_sl_pips").value = (s.fixed_sl_pips ?? 50);
-      document.getElementById("fixed_tp_pips").value = (s.fixed_tp_pips ?? 50);
-
-      const badge = document.getElementById("statusBadge");
-      badge.textContent = s.enabled ? "ON" : "OFF";
-      badge.className = "badge " + (s.enabled ? "ok" : "off");
-
-      document.getElementById("pairsText").textContent = pairsVal;
-      document.getElementById("lotText").textContent = (s.lot_size ?? "-");
-
-      const eaBadge = document.getElementById("eaBadge");
-      const lastSeen = document.getElementById("lastSeenText");
-
-      if(s.ea_connected){
-        eaBadge.textContent = "Connected ✅";
-        eaBadge.className = "badge live";
-      }else{
-        eaBadge.textContent = "Offline ⚠️";
-        eaBadge.className = "badge dead";
-      }
-
-      lastSeen.textContent = s.last_seen_at ? new Date(s.last_seen_at).toLocaleString() : "-";
-
-      // sync buttons UI (safe)
-      syncPairButtonsFromInput();
-    }
-
-    async function refresh(){
-      msg.textContent = "Loading...";
-      try{
-        const s = await api("/api/v1/status","GET");
-        fillForm(s);
-        msg.textContent = "";
-      }catch(e){
-        msg.textContent = "Error: " + e.message;
-      }
-    }
-
-    document.getElementById("refreshBtn").onclick = refresh;
-
-    startBtn.onclick = async ()=>{
-      if(!updateStartGate()){
-        riskHint.style.display = "block";
-        msg.textContent = "Please confirm the risk disclaimer first.";
-        return;
-      }
-
-      msg.textContent = "Starting...";
-      try{
-        await api("/api/v1/toggle","POST",{ enabled:true });
-        await refresh();
-        msg.textContent = "Started.";
-      }catch(e){
-        msg.textContent = "Error: " + e.message;
-      }
-    };
-
-    document.getElementById("stopBtn").onclick = async ()=>{
-      msg.textContent = "Stopping...";
-      try{
-        await api("/api/v1/toggle","POST",{ enabled:false });
-        await refresh();
-        msg.textContent = "Stopped.";
-      }catch(e){ msg.textContent = "Error: " + e.message; }
-    };
-
-    document.getElementById("saveBtn").onclick = async ()=>{
-      msg2.textContent = "Saving...";
-      try{
-        await api("/api/v1/settings","POST",{
-          pairs: document.getElementById("pairs").value.trim(),
-          lot_size: Number(document.getElementById("lot").value),
-
-          sl_mode: document.getElementById("sl_mode").value,
-          tp_mode: document.getElementById("tp_mode").value,
-
-          min_pips: Number(document.getElementById("min_pips").value),
-          sl_buffer_pips: Number(document.getElementById("sl_buffer_pips").value),
-
-          rr: Number(document.getElementById("rr").value),
-          pattern_tp_mult: Number(document.getElementById("pattern_tp_mult").value),
-
-          fixed_sl_pips: Number(document.getElementById("fixed_sl_pips").value),
-          fixed_tp_pips: Number(document.getElementById("fixed_tp_pips").value)
-        });
-
-        msg2.textContent = "Saved. EA will pick this up on next poll.";
-        await refresh();
-      }catch(e){
-        msg2.textContent = "Error: " + e.message;
-      }
-    };
-
-    document.getElementById("copyKeyBtn").onclick = async ()=>{
-      const key = getApiKey() || "";
-      if(!key){
-        msg2.textContent = "No API key found yet. Please login again.";
-        return;
-      }
-      await navigator.clipboard.writeText(key);
-      msg2.textContent = "API key copied.";
-    };
-
-    // ----------------------------
-    // Pair Buttons (Allowed + Locked)
-    // ----------------------------
-    const ALLOWED = [
-      { sym:"XAUUSD", label:"Gold (XAUUSD)", tip:"Gold. Supported." },
-      { sym:"EURUSD", label:"EURUSD", tip:"Major FX. Supported." },
-      { sym:"GBPUSD", label:"GBPUSD", tip:"Major FX. Supported." },
-      { sym:"USDJPY", label:"USDJPY", tip:"Major FX. Supported." },
-    ];
-
-    const LOCKED = [
-      { sym:"BTCUSD", label:"BTCUSD", tip:"Locked for now (crypto strategy coming soon)." },
-      { sym:"NAS100", label:"NAS100", tip:"Locked for now (index strategy coming soon)." },
-      { sym:"US30",  label:"US30",  tip:"Locked for now (index strategy coming soon)." },
-    ];
-
-    function parsePairsInput(){
-      const raw = (document.getElementById("pairs").value || "").trim();
-      if(!raw) return [];
-      return raw.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean);
-    }
-
-    function setPairsInput(list){
-      const unique = [];
-      const seen = new Set();
-      for(const x of list){
-        if(!seen.has(x)){
-          seen.add(x);
-          unique.push(x);
-        }
-      }
-      document.getElementById("pairs").value = unique.join(",");
-    }
-
-    function buildPairButtons(){
-      const wrap = document.getElementById("pairButtons");
-      wrap.innerHTML = "";
-
-      function makeBtn(item, locked=false){
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "pair-btn" + (locked ? " locked" : "");
-        btn.setAttribute("data-sym", item.sym);
-        btn.innerHTML = `
-          <span>${item.label}</span>
-          <span class="info" data-tip="${item.tip}">?</span>
-          ${locked ? `<span class="locktag">Locked</span>` : ``}
-        `;
-
-        if(locked){
-          btn.disabled = true;
-          btn.classList.add("disabled");
-          return btn;
-        }
-
-        btn.onclick = () => {
-          const cur = parsePairsInput();
-          const sym = item.sym;
-
-          const has = cur.includes(sym);
-          const next = has ? cur.filter(x=>x!==sym) : cur.concat([sym]);
-          setPairsInput(next);
-          syncPairButtonsFromInput();
-        };
-
-        return btn;
-      }
-
-      // allowed
-      for(const a of ALLOWED){
-        wrap.appendChild(makeBtn(a,false));
-      }
-
-      // locked header
-      const sep = document.createElement("div");
-      sep.className = "pair-sep";
-      sep.textContent = "Locked markets (coming soon)";
-      wrap.appendChild(sep);
-
-      for(const l of LOCKED){
-        wrap.appendChild(makeBtn(l,true));
-      }
-    }
-
-    function syncPairButtonsFromInput(){
-      // safe even if buttons not built yet
-      const nodes = document.querySelectorAll(".pair-btn");
-      if(!nodes || nodes.length === 0) return;
-
-      const cur = new Set(parsePairsInput());
-      nodes.forEach(btn=>{
-        const sym = btn.getAttribute("data-sym");
-        if(!sym) return;
-        if(btn.classList.contains("locked")) return;
-        if(cur.has(sym)) btn.classList.add("selected");
-        else btn.classList.remove("selected");
-      });
-    }
-
-    // init
-    if(requireLoginSafe()){
-      buildPairButtons();
-      updateStartGate();
-      refresh();
-    }
-  </script>
 </body>
 </html>
