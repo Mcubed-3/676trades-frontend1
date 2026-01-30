@@ -1,44 +1,69 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>676Trades - Login</title>
+  <title>676trades.org — Sign In</title>
+  <meta name="description" content="Sign in to your Christ-centered marriage community account." />
   <link rel="stylesheet" href="styles.css"/>
+
+  <style>
+    .btnRow{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .tiny{ font-size:12px; opacity:.8; line-height:1.35; margin-top:10px; }
+  </style>
 </head>
+
 <body>
   <div class="container">
     <div class="nav">
-      <div><b>676Trades</b></div>
-      <div><a href="/register.html">Register</a></div>
+      <div>
+        <b>676trades.org</b>
+        <div style="opacity:.75;font-size:12px;margin-top:2px;">Christ-centered marriage community</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <a href="/index.html">Home</a>
+        <a href="/community-guidelines.html">Guidelines</a>
+        <a href="/register.html">Create account</a>
+      </div>
     </div>
 
     <div class="card">
-      <h1>Login</h1>
-      <div class="small">Login to access your dashboard. Your MT5 EA key is available after login.</div>
+      <h1>Sign in</h1>
+      <div class="small">
+        Welcome back. This is a calm space for respectful connection, community discussion, and intentional courtship.
+      </div>
+
+      <hr/>
 
       <label>Email</label>
-      <input id="email" type="email" placeholder="you@example.com"/>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
 
       <label>Password</label>
-      <input id="password" type="password" placeholder="Your password"/>
+      <input id="password" type="password" placeholder="Your password" autocomplete="current-password"/>
 
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="btn">Login</button>
+      <div class="btnRow">
+        <button id="btn">Sign in</button>
         <button id="forgotBtn" class="secondary">Forgot password?</button>
+        <a class="btn btnGhost" href="/register.html">Create account</a>
       </div>
 
       <div id="msg" class="toast"></div>
 
+      <div class="tiny">
+        By using this platform, you agree to communicate respectfully and follow the
+        <a href="/community-guidelines.html"><b>Community Guidelines</b></a>.
+      </div>
+
+      <!-- Forgot Password Panel -->
       <div id="forgotBox" style="display:none;margin-top:16px;">
         <hr/>
         <h3 style="margin-top:0;">Reset your password</h3>
         <div class="small">Enter your email and we’ll send a reset link (if the account exists).</div>
 
         <label style="margin-top:10px;">Email</label>
-        <input id="forgotEmail" type="email" placeholder="you@example.com"/>
+        <input id="forgotEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
 
-        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+        <div class="btnRow" style="margin-top:12px;">
           <button id="sendResetBtn">Send reset email</button>
           <button id="cancelForgotBtn" class="secondary">Cancel</button>
         </div>
@@ -54,16 +79,16 @@
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const msg = document.getElementById("msg");
-      msg.textContent = "Logging in...";
+      msg.textContent = "Signing in...";
 
       try{
         const data = await api("/auth/login","POST",{email,password});
 
-        // IMPORTANT: store JWT + api_key separately
+        // IMPORTANT: store JWT + api_key separately (kept as-is for your backend)
         setAccessToken(data.access_token);
         setApiKey(data.api_key);
 
-        msg.textContent = "Logged in. Redirecting...";
+        msg.textContent = "Signed in. Redirecting...";
         setTimeout(()=>window.location.href="/dashboard.html",700);
       }catch(e){
         msg.textContent = "Error: " + e.message;
